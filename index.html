@@ -39,11 +39,12 @@
         margin-right: auto;
         max-width: 500px;
         width: 100%;
+        position: relative;
       }
       #keyword {
         padding: 10px;
-        width: calc(100% - 120px);
-        max-width: 400px;
+        width: 100%;
+        padding-right: 10px;
         border: 1px solid #ccc;
         border-radius: 5px 0 0 5px;
         margin-right: 0;
@@ -57,6 +58,15 @@
         outline: none;
         border-color: #007BFF;
         box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+      }
+      #searchIcon {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-65%);
+      }
+      #searchIcon:hover {
+        color: #0056b3;
       }
       button {
         padding: 10px 20px;
@@ -337,7 +347,6 @@
         color: #007BFF;
         text-align: center;
       }
-      /* 新增滑動開關樣式 */
       .switch {
         position: relative;
         display: inline-block;
@@ -377,11 +386,45 @@
       input:checked + .slider:before {
         transform: translateX(26px);
       }
-      /* 修正 PWA 圖片變形問題 */
       #githubButton img,
       #installButton img {
+        display: block;
+        margin: 0;
+        width: 35px;
+        height: 35px;
         object-fit: contain;
       }
+      #installButton {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      #installButton {
+        position: fixed;
+        bottom: 140px;
+        right: 20px;
+        z-index: 1000;
+        width: 50px;
+        height: 50px;
+        background: white;
+        color: black;
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        padding: 0;
+      }
+      #installButton img {
+        display: block;
+        margin: 0 auto; 
+        width: 35px;
+        height: 35px;
+        object-fit: contain;
+      }
+      
     </style>
   </head>
   <body>
@@ -393,10 +436,9 @@
     <div id="mainContent" style="display:none;">
       <h1>高雄 YouBike 搜尋</h1>
       <div id="searchContainer">
-        <input type="text" id="keyword" placeholder="請輸入站點名稱、區域或地址" value="" />
-        <button id="searchButton">搜尋</button>
+        <input type="text" id="keyword" placeholder="請輸入站點名稱、地址" value="" />
+        <span id="searchIcon" title="搜尋">🔍</span>
       </div>
-      <!-- 修改定位開關為滑動開關 -->
       <div id="locationSwitchContainer" style="text-align: center; margin: 10px 0;">
         <label class="switch">
           <input type="checkbox" id="toggleUseLocation" />
@@ -411,25 +453,23 @@
         <p id="modalText"></p>
         <button id="modalButton">確定</button>
       </div>
-      <!-- 新增 GitHub 按鈕 -->
       <a href="https://github.com/potatosserver/YouBike" target="_blank" title="GitHub Repository">
         <button id="githubButton" style="position: fixed; bottom: 80px; right: 20px; z-index: 1000; width: 50px; height: 50px; background: white; color: black; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;">
-          <img src="/YouBike/icons/github.png" alt="GitHub" style="width:35px; height:35px;" />
+          <img src="https://potatosserver.github.io/YouBike/icons/github.png" alt="GitHub" style="width:35px; height:35px;" />
         </button>
       </a>
-      <!-- 新增手動安裝按鈕，調整位置避免重疊 -->
       <button id="installButton" style="position: fixed; bottom: 140px; right: 20px; z-index: 1000; width: 50px; height: 50px; background: white; color: black; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;">
-        <img src="/YouBike/icons/install.png" alt="安裝" style="width:35px; height:35px;" />
+        <img src="https://potatosserver.github.io/YouBike/icons/install.png" alt="安裝" style="width:35px; height:35px;" />
       </button>
-      <!-- 顏色模式變換按鈕 -->
       <button id="toggleDarkMode" title="切換暗色模式">🌙</button>
     </div>
     <script>
       let userLocation = null;
-      let sortingLocked = false; // 新增：排序鎖定旗標
+      let sortingLocked = false;
       let initialLoad = true;
       let locationDenied = false;
       let geolocationErrorMessage = null;
+      let dataLoaded = false; // 新增：記錄資料是否已載入完成
       const defaultLatitude = 22.6315725;
       const defaultLongitude = 120.3025079;
       const overlay = document.querySelector('.overlay');
@@ -439,22 +479,16 @@
       const resultsDiv = document.getElementById('results');
       const loadingDiv = document.getElementById('loading');
       const keywordInput = document.getElementById('keyword');
-      const searchButton = document.getElementById('searchButton');
-
       const maxResults = 100;
       const defaultSearchArea = "";
-
       const pinnedStations = new Set(JSON.parse(localStorage.getItem('pinnedStations') || '[]'));
-      // 讀取並設定使用定位的狀態，預設為 true
       const useLocationSetting = localStorage.getItem("useLocation");
       const useLocation = useLocationSetting === null ? true : useLocationSetting === "true";
       document.getElementById('toggleUseLocation').checked = useLocation;
-
-      // 修改定位開關事件處理器：若開啟則立即鎖定排序再呼叫 getLocation()
       document.getElementById('toggleUseLocation').addEventListener('change', function () {
         localStorage.setItem("useLocation", this.checked);
         if (this.checked) {
-          sortingLocked = true; // 立即鎖定排序
+          sortingLocked = true;
           getLocation();
         } else {
           userLocation = { latitude: defaultLatitude, longitude: defaultLongitude };
@@ -463,7 +497,6 @@
           setTimeout(updateResultsOrder, 1500);
         }
       });
-
       function togglePinStation(stationId, event) {
         event.stopPropagation();
         if (pinnedStations.has(stationId)) {
@@ -472,30 +505,37 @@
           pinnedStations.add(stationId);
         }
         localStorage.setItem('pinnedStations', JSON.stringify([...pinnedStations]));
-
         const pinButton = document.querySelector(`.pin-button[data-id="${stationId}"]`);
         if (pinButton) {
           pinButton.classList.toggle('pinned');
           pinButton.textContent = pinnedStations.has(stationId) ? '★' : '☆';
         }
-
         updateResultsOrder();
       }
-
       let mainContentShown = false;
       function showMainContent() {
         if (!mainContentShown) {
           const overlay = document.getElementById("loadingOverlay");
           const mainContent = document.getElementById("mainContent");
-          overlay.style.opacity = "0";
-          setTimeout(() => {
-            overlay.style.display = "none";
-            mainContent.style.display = "block";
-          }, 500);
+          if (navigator.onLine) {
+            // 線上模式，原有動畫
+            overlay.style.opacity = "0";
+            setTimeout(() => {
+              overlay.style.display = "none";
+              mainContent.style.display = "block";
+            }, 500);
+          } else {
+            // 離線模式，更新訊息並延後隱藏
+            document.getElementById("loadingText").textContent = "目前離線模式，請稍候...";
+            overlay.style.opacity = "1"; // 確保 Loading 畫面清晰可見
+            setTimeout(() => {
+              overlay.style.display = "none";
+              mainContent.style.display = "block";
+            }, 3000);
+          }
           mainContentShown = true;
         }
       }
-
       (function simulateLoadingPercentage() {
         const loadingText = document.getElementById("loadingText");
         let progress = 0;
@@ -516,31 +556,38 @@
           }
         }, 50);
       })();
+      let kcgDataCache = null; // 用於緩存第一個 API 的資料
 
       async function searchYouBike(showLoadingIndicator = true) {
         if (showLoadingIndicator) showLoading();
         const keyword = keywordInput.value.trim().toLowerCase();
         try {
-          const kcgUrl = "https://api.kcg.gov.tw/api/service/Get/b4dd9c40-9027-4125-8666-06bef1756092";
-          const kcgResponse = await fetch(kcgUrl, {
-            headers: { "User-Agent": "Mozilla/5.0" }
-          });
-          if (!kcgResponse.ok) throw new Error(`HTTP error! status: ${kcgResponse.status}`);
-          const kcgData = await kcgResponse.json();
-          const kcgRetVal = kcgData?.data?.data?.retVal;
-          if (!Array.isArray(kcgRetVal)) {
-            resultsDiv.innerHTML = "<p>找不到資料，請檢查 API 回應格式或資料來源。</p>";
-            if (showLoadingIndicator) hideLoading();
-            return;
+          // 新增離線模式判斷與快取讀取
+          if (navigator.onLine) {
+            if (!kcgDataCache) {
+              // 第一次載入時請求第1個 API
+              const kcgUrl = "https://api.kcg.gov.tw/api/service/Get/b4dd9c40-9027-4125-8666-06bef1756092";
+              const kcgResponse = await fetch(kcgUrl, {
+                headers: { "User-Agent": "Mozilla/5.0" }
+              });
+              if (!kcgResponse.ok) throw new Error(`HTTP error! status: ${kcgResponse.status}`);
+              const kcgData = await kcgResponse.json();
+              kcgDataCache = kcgData?.data?.data?.retVal || [];
+              // 將取得的資料儲存至 localStorage
+              localStorage.setItem('cachedKcgData', JSON.stringify(kcgDataCache));
+            }
+          } else {
+            if (!kcgDataCache) {
+              // 從 localStorage 讀取之前儲存的第1個 API 資料
+              kcgDataCache = JSON.parse(localStorage.getItem('cachedKcgData') || '[]');
+            }
           }
-
-          let kcgResults = kcgRetVal;
+          let kcgResults = kcgDataCache;
           if (keyword) {
             kcgResults = kcgResults.filter(station => {
               const stationName = station.sna ? station.sna.toLowerCase() : '';
-              const stationArea = station.sarea ? station.sarea.toLowerCase() : '';
               const stationAddress = station.ar ? station.ar.toLowerCase() : '';
-              return stationArea.includes(keyword) || stationName.includes(keyword) || stationAddress.includes(keyword);
+              return stationName.includes(keyword) || stationAddress.includes(keyword);
             });
           }
           kcgResults = kcgResults.sort((a, b) => {
@@ -559,7 +606,6 @@
           let limit = keyword ? 50 : 20;
           let usedStations;
           if (!keyword) {
-            // 首頁狀態：顯示釘選車站在前，其次依定位排序其他車站
             const pinnedFromLocal = kcgResults.filter(station => pinnedStations.has(String(station.sno)));
             const unpinned = kcgResults.filter(station => !pinnedStations.has(String(station.sno)));
             pinnedFromLocal.sort((a, b) => {
@@ -591,7 +637,6 @@
             usedStations = [...pinnedFromLocal, ...unpinned].slice(0, limit);
           } else {
             usedStations = kcgResults.slice(0, limit);
-            // 當有關鍵字時維持原本邏輯：先釘選再非釘選排序
             const pinnedList = usedStations.filter(station => pinnedStations.has(String(station.sno)));
             const nonPinnedList = usedStations.filter(station => !pinnedStations.has(String(station.sno)));
             pinnedList.sort((a, b) => {
@@ -622,9 +667,12 @@
             });
             usedStations = [...pinnedList, ...nonPinnedList];
           }
+          const isOnline = navigator.onLine;
+          let vehData = {};
           const stationIds = usedStations.map(station => String(station.sno));
-          const vehData = await queryVehicleData(stationIds);
-
+          if (isOnline) {
+            vehData = await queryVehicleData(stationIds); // 線上模式取得車子資訊
+          }
           const organizedOutput = usedStations.map(site => {
             const info = {
               id: String(site.sno),
@@ -633,10 +681,9 @@
               district: site.sarea,
               address: site.ar
             };
-            const vehicle = Object.entries(vehData).find(([key]) => key === info.id)?.[1] || {};
+            const vehicle = isOnline ? (Object.entries(vehData).find(([key]) => key === info.id)?.[1] || {}) : {};
             return { station_info: info, vehicle_info: vehicle };
           });
-
           resultsDiv.innerHTML = '';
           organizedOutput.forEach(item => {
             const station = item.station_info;
@@ -648,15 +695,19 @@
               station.coords[0],
               station.coords[1]
             );
-            const cardContent = `
-                        ${pinButton}
-                        <h3>${station.name || '未知站點'}</h3>
-                        <p class="distance">距離: ${distance.toFixed(2)} 公里</p>
-                        <p>地區: ${station.district || '未知區域'}</p>
-                        <p>地址: ${station.address || '未知地址'}</p>
+            const displayDistance = distance < 1 ? Math.round(distance * 1000) + " 公尺" : distance.toFixed(2) + " 公里";
+            // 僅在線上模式顯示車子數量
+            const vehicleInfoHtml = isOnline ? `
                         <p>YouBike 2.0: <span class="vehicle_yb2">${vehicle?.available_2_0 !== undefined ? vehicle.available_2_0 : '未知'}</span></p>
                         <p>YouBike 2.0E: <span class="vehicle_ybe">${vehicle?.available_e !== undefined ? vehicle.available_e : '未知'}</span></p>
                         <p>可停空位數: <span class="vehicle_empty">${vehicle?.empty_spaces !== undefined ? vehicle.empty_spaces : '未知'}</span></p>
+                      ` : '';
+            const cardContent = `
+                        ${pinButton}
+                        <h3>${station.name || '未知站點'}</h3>
+                        <p class="distance">距離: ${displayDistance}</p>
+                        <p>地址: ${station.address || '未知地址'}</p>
+                        ${vehicleInfoHtml}
                     `;
             const card = document.createElement('div');
             card.className = 'station';
@@ -676,6 +727,11 @@
             });
             resultsDiv.appendChild(card);
           });
+          updateResultsOrder();
+          // 新增：等待一次事件迴圈，確保卡片 DOM 更新完成
+          await new Promise(resolve => setTimeout(resolve, 0));
+
+          dataLoaded = true; // 資料已載入完成
           showMainContent();
         } catch (error) {
           console.error("Fetch error:", error);
@@ -684,7 +740,6 @@
           if (showLoadingIndicator) hideLoading();
         }
       }
-
       async function queryVehicleData(stationIds) {
         if (stationIds.length > 60) {
           stationIds = stationIds.slice(0, 60);
@@ -697,11 +752,9 @@
           'Origin': 'https://www.youbike.com.tw',
           'Referer': 'https://www.youbike.com.tw/'
         };
-
         for (let i = 0; i < stationIds.length; i += batchSize) {
           const stationIdBatch = stationIds.slice(i, i + batchSize);
           const body = JSON.stringify({ station_no: stationIdBatch });
-
           try {
             const response = await fetch('https://apis.youbike.com.tw/tw2/parkingInfo', {
               method: 'POST',
@@ -727,10 +780,7 @@
         }
         return allVehicleData;
       }
-
-      // 修改 updateResultsOrder：若排序被鎖定則不進行重新排序
       function updateResultsOrder() {
-        if (sortingLocked) return;
         const cards = Array.from(document.querySelectorAll(".station"));
         cards.sort((a, b) => {
           const aPinned = pinnedStations.has(a.dataset.id);
@@ -755,26 +805,21 @@
           resultsDiv.appendChild(card);
         });
       }
-
       function showLoading() {
         loadingDiv.classList.add('show');
       }
-
       function hideLoading() {
         loadingDiv.classList.remove('show');
       }
-
       function showModal(message) {
         modalText.textContent = message;
         overlay.classList.add('show');
         modal.classList.add('show');
       }
-
       function hideModal() {
         overlay.classList.remove('show');
         modal.classList.remove('show');
       }
-
       function calculateDistance(lat1, lon1, lat2, lon2) {
         const R = 6371;
         const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -785,18 +830,19 @@
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return R * c;
       }
-
-      // 修改 handleGeolocationSuccess：資料請求完成後解除鎖定並進行排序
       async function handleGeolocationSuccess(position) {
+        const wasDefault = !userLocation || (userLocation.latitude === defaultLatitude && userLocation.longitude === defaultLongitude);
         userLocation = {
           latitude: position.coords.latitude,
           longitude: position.coords.longitude
         };
-        await searchYouBike();
-        sortingLocked = false; // 解鎖排序
-        updateResultsOrder();
+        if (wasDefault) {
+          await searchYouBike();
+          updateResultsOrder();
+        } else {
+          updateCardDistances();
+        }
       }
-
       function handleGeolocationError(error) {
         console.error("Geolocation error:", error);
         locationDenied = true;
@@ -806,50 +852,76 @@
             errorMessage = "未提供定位權限，將使用捷運美麗島站作為中心定位。";
             break;
           case error.POSITION_UNAVAILABLE:
-            errorMessage = "定位資訊不可用，將使用捷運美麗島站作為中心定位。";
+            errorMessage = "定位資訊不可用，將使用捷運美麗島站作為中心定位直到定位成功。";
             break;
           case error.TIMEOUT:
-            errorMessage = "定位逾時，將使用捷運美麗島站作為中心定位。";
+            errorMessage = "定位逾時，將使用捷運美麗島站作為中心定位直到定位成功。";
             break;
           default:
-            errorMessage = "定位錯誤，將使用捷運美麗島站作為中心定位。";
+            errorMessage = "定位錯誤，將使用捷運美麗島站作為中心定位直到定位成功。";
             break;
         }
         showModal(errorMessage);
         userLocation = { latitude: defaultLatitude, longitude: defaultLongitude };
         searchYouBike();
       }
-
       function handleGeoUpdateSuccess(position) {
+        const wasDefault = userLocation && userLocation.latitude === defaultLatitude && userLocation.longitude === defaultLongitude;
         userLocation = {
           latitude: position.coords.latitude,
           longitude: position.coords.longitude
         };
-        updateCardDistances();
+        if (wasDefault) {
+          searchYouBike().then(() => {
+            updateResultsOrder();
+          });
+        } else {
+          updateCardDistances();
+        }
       }
       function handleGeoUpdateError(error) {
         console.error("Geolocation update error:", error);
       }
-
       function getLocation() {
-        // 檢查定位開關是否開啟，若未開啟則直接返回
         if (!document.getElementById('toggleUseLocation').checked) {
           return;
         }
         if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(handleGeolocationSuccess, handleGeolocationError, {
-            enableHighAccuracy: true,
-            timeout: 10000,
-            maximumAge: 0
-          });
+          let timeoutTriggered = false;
+          const geoTimeout = setTimeout(() => {
+            timeoutTriggered = true;
+            handleGeolocationError({ code: 3, message: "首次定位超時" });
+          }, 10000);
+          navigator.geolocation.getCurrentPosition(
+            function (position) {
+              if (!timeoutTriggered) {
+                clearTimeout(geoTimeout);
+                handleGeolocationSuccess(position);
+              }
+            },
+            function (error) {
+              if (!timeoutTriggered) {
+                clearTimeout(geoTimeout);
+                handleGeolocationError(error);
+              }
+            },
+            {
+              enableHighAccuracy: true,
+              timeout: 10000,
+              maximumAge: 0
+            }
+          );
           setInterval(() => {
-            // 每次發送前再檢查開關狀態
             if (document.getElementById('toggleUseLocation').checked) {
-              navigator.geolocation.getCurrentPosition(handleGeoUpdateSuccess, handleGeoUpdateError, {
-                enableHighAccuracy: true,
-                timeout: 10000,
-                maximumAge: 0
-              });
+              navigator.geolocation.getCurrentPosition(
+                handleGeoUpdateSuccess,
+                handleGeoUpdateError,
+                {
+                  enableHighAccuracy: true,
+                  timeout: 10000,
+                  maximumAge: 0
+                }
+              );
             }
           }, 10000);
         } else {
@@ -859,7 +931,6 @@
           hideLoading();
         }
       }
-
       function updateCardDistances() {
         const cards = document.querySelectorAll('.station');
         cards.forEach(card => {
@@ -872,13 +943,11 @@
           );
           const distanceEl = card.querySelector('.distance');
           if (distanceEl) {
-            distanceEl.textContent = "距離: " + newDistance.toFixed(2) + " 公里";
+            distanceEl.textContent = "距離: " + (newDistance < 1 ? Math.round(newDistance * 1000) + " 公尺" : newDistance.toFixed(2) + " 公里");
           }
         });
-        // 更新排序
         updateResultsOrder();
       }
-
       function updateVehicleData() {
         const stationElements = document.querySelectorAll('.station');
         if (!stationElements.length) return;
@@ -895,12 +964,12 @@
               if (ybeEl) ybeEl.textContent = (data.available_e !== undefined ? data.available_e : '未知');
               if (emptyEl) emptyEl.textContent = (data.empty_spaces !== undefined ? data.empty_spaces : '未知');
             });
+            updateResultsOrder();
           })
           .catch(error => {
             console.error("Vehicle data update failed:", error);
           });
       }
-
       const toggleDarkModeButton = document.getElementById('toggleDarkMode');
       toggleDarkModeButton.addEventListener('click', () => {
         document.body.classList.toggle('dark-mode');
@@ -912,42 +981,72 @@
         document.body.classList.add("dark-mode");
         toggleDarkModeButton.innerHTML = '<span style="color:#ffd700; font-size:32px;">☀️</span>';
       }
-
       modalButton.addEventListener('click', hideModal);
-
       if (useLocation) {
         getLocation();
       } else {
         userLocation = { latitude: defaultLatitude, longitude: defaultLongitude };
         searchYouBike();
       }
-
-      searchButton.addEventListener('click', searchYouBike);
-
       keywordInput.addEventListener('keypress', function (event) {
         if (event.key === 'Enter') {
           searchYouBike();
         }
       });
       setInterval(updateVehicleData, 60000);
-      // 新增：每10秒依定位更新排序與卡片距離
-      setInterval(updateCardDistances, 10000);
-
-      // 新增安裝事件
+      setInterval(() => {
+        if (document.getElementById('toggleUseLocation').checked) {
+          searchYouBike(false);
+        }
+      }, 60000);
       let deferredPrompt;
-      window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        document.getElementById('installButton').style.display = 'block';
+      document.addEventListener('DOMContentLoaded', () => {
+        window.addEventListener('beforeinstallprompt', (e) => {
+          e.preventDefault();
+          deferredPrompt = e;
+          document.getElementById('installButton').style.display = 'block';
+        });
+        document.getElementById('installButton').addEventListener('click', async () => {
+          try {
+            if (deferredPrompt) {
+              await deferredPrompt.prompt();
+              const { outcome } = await deferredPrompt.userChoice;
+              console.log('User response to the install prompt:', outcome);
+              deferredPrompt = null;
+            } else if (window.matchMedia('(display-mode: standalone)').matches) {
+              alert("App 已在運行中。");
+            } else {
+              const errorMessage = 'App 已安裝，請從主畫面或開始清單中打開應用程式。';
+              console.error('PWA button error:', errorMessage, { deferredPrompt: deferredPrompt, displayMode: window.matchMedia('(display-mode: standalone)').matches, userAgent: navigator.userAgent, manifestHref: document.querySelector('link[rel="manifest"]')?.href });
+              alert(errorMessage);
+            }
+          } catch (error) {
+            console.error('安裝按鈕發生錯誤:', error);
+          }
+        });
       });
+      window.addEventListener('appinstalled', () => {
+        console.log('App 已安裝');
+        deferredPrompt = null;
+        const installBtn = document.getElementById('installButton');
+        installBtn.innerHTML = '<img src="https://potatosserver.github.io/YouBike/icons/open.png" alt="開啟" />';
+      });
+      document.querySelector('h1').addEventListener('click', function() {
+        keywordInput.value = '';
+        searchYouBike();
+      });
+      const searchIcon = document.getElementById('searchIcon');
+      searchIcon.addEventListener('click', searchYouBike);
 
-      document.getElementById('installButton').addEventListener('click', async () => {
-        if (deferredPrompt) {
-          deferredPrompt.prompt();
-          const { outcome } = await deferredPrompt.userChoice;
-          console.log('User response to the install prompt:', outcome);
-          deferredPrompt = null;
-          document.getElementById('installButton').style.display = 'none';
+      // 修改 window.load 事件，僅在資料未載入完成時才強制呼叫 showMainContent
+      window.addEventListener('load', () => {
+        if (!dataLoaded) {
+          // 若主要內容未載入完成，延遲一段時間後再呼叫 showMainContent
+          setTimeout(() => {
+            if (!dataLoaded) { 
+              showMainContent();
+            }
+          }, 3000);
         }
       });
     </script>

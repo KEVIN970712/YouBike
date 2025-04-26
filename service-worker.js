@@ -4,12 +4,10 @@ self.addEventListener('install', (event) => {
             return cache.addAll([
                 '/',
                 '/YouBike/index.html',
-                '/YouBike/nightly.html',
                 '/YouBike/main.js',
                 '/YouBike/manifest.json',
-                // Add any other assets you want to cache
             ]);
-        })
+        }).then(() => self.skipWaiting()) // 加入立即跳過等待
     );
 });
 
@@ -36,6 +34,6 @@ self.addEventListener('activate', (event) => {
                     }
                 })
             );
-        })
+        }).then(() => self.clients.claim()) // 加入立即控制所有客戶端
     );
 });

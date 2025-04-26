@@ -1,12 +1,12 @@
 {
   "name": "YouBike Station Finder",
-  "version": "1.0.0",
+  "version": "1.4.0",
   "short_name": "YouBike",
   "description": "A Progressive Web App for YouBike station search and information.",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#4CAF50",
+  "theme_color": "#ffaa00",
   "icons": [
     {
       "src": "icons/icon-192x192.png",
