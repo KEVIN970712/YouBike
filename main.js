@@ -3,11 +3,6 @@ fetch('https://apis.youbike.com.tw/json/station-min-yb2.json', {
         'accept': '*/*',
         'accept-language': 'zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7,zh-CN;q=0.6',
         'content-type': 'application/x-www-form-urlencoded',
-        // 注意：If-Modified-Since 和 If-None-Match 標頭在前端直接使用可能會因為跨域問題而受限，
-        // 通常這些用於快取控制的標頭會由瀏覽器自動處理或在後端設定。
-        // 您可以先不加這兩個標頭，測試是否能成功獲取資料。
-        // 'if-modified-since': 'Sat, 03 May 2025 09:40:26 GMT',
-        // 'if-none-match': 'W/"6815e48a-358846"',
         'origin': 'https://kevin970712.github.io/YouBike/', 
         'referer': 'https://kevin970712.github.io/YouBike/', 
         // 其他 sec-ch-ua, sec-fetch 等標頭通常由瀏覽器自動管理
