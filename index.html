@@ -386,18 +386,12 @@
       input:checked + .slider:before {
         transform: translateX(26px);
       }
-      #githubButton img,
-      #installButton img {
+      #githubButton img {
         display: block;
         margin: 0;
-        width: 35px;
-        height: 35px;
+        width: 45px;
+        height: 45px;
         object-fit: contain;
-      }
-      #installButton {
-        display: flex;
-        align-items: center;
-        justify-content: center;
       }
       #installButton {
         position: fixed;
@@ -420,8 +414,8 @@
       #installButton img {
         display: block;
         margin: 0 auto; 
-        width: 35px;
-        height: 35px;
+        width: 45px;
+        height: 45px;
         object-fit: contain;
       }
       
@@ -459,7 +453,7 @@
         </button>
       </a>
       <button id="installButton" style="position: fixed; bottom: 140px; right: 20px; z-index: 1000; width: 50px; height: 50px; background: white; color: black; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;">
-        <img src="https://potatosserver.github.io/YouBike/icons/install.png" alt="安裝" style="width:35px; height:35px;" />
+        <img src="https://potatosserver.github.io/YouBike/icons/install.png" alt="安裝" style="width:45px; height:45px;" />
       </button>
       <button id="toggleDarkMode" title="切換暗色模式">🌙</button>
     </div>
@@ -526,7 +520,7 @@
             }, 500);
           } else {
             // 離線模式，更新訊息並延後隱藏
-            document.getElementById("loadingText").textContent = "目前離線模式，請稍候...";
+            document.getElementById("loadingText").textContent = "離線模式啟動中...";
             overlay.style.opacity = "1"; // 確保 Loading 畫面清晰可見
             setTimeout(() => {
               overlay.style.display = "none";
@@ -684,11 +678,13 @@
             const vehicle = isOnline ? (Object.entries(vehData).find(([key]) => key === info.id)?.[1] || {}) : {};
             return { station_info: info, vehicle_info: vehicle };
           });
-          resultsDiv.innerHTML = '';
+          // 將下列重建 DOM 的邏輯改成更新已存在的 DOM
+          // 原本的： resultsDiv.innerHTML = ''; ... 建立所有卡片 ...
           organizedOutput.forEach(item => {
             const station = item.station_info;
             const vehicle = item.vehicle_info;
-            const pinButton = `<span class="pin-button ${pinnedStations.has(station.id) ? 'pinned' : ''}" data-id="${station.id}" onclick="togglePinStation('${station.id}', event)">${pinnedStations.has(station.id) ? '★' : '☆'}</span>`;
+            let card = document.querySelector(`.station[data-id="${station.id}"]`);
+            const pinButtonHtml = `<span class="pin-button ${pinnedStations.has(station.id) ? 'pinned' : ''}" data-id="${station.id}" onclick="togglePinStation('${station.id}', event)">${pinnedStations.has(station.id) ? '★' : '☆'}</span>`;
             const distance = calculateDistance(
               userLocation ? userLocation.latitude : defaultLatitude,
               userLocation ? userLocation.longitude : defaultLongitude,
@@ -696,43 +692,60 @@
               station.coords[1]
             );
             const displayDistance = distance < 1 ? Math.round(distance * 1000) + " 公尺" : distance.toFixed(2) + " 公里";
-            // 僅在線上模式顯示車子數量
             const vehicleInfoHtml = isOnline ? `
                         <p>YouBike 2.0: <span class="vehicle_yb2">${vehicle?.available_2_0 !== undefined ? vehicle.available_2_0 : '未知'}</span></p>
                         <p>YouBike 2.0E: <span class="vehicle_ybe">${vehicle?.available_e !== undefined ? vehicle.available_e : '未知'}</span></p>
                         <p>可停空位數: <span class="vehicle_empty">${vehicle?.empty_spaces !== undefined ? vehicle.empty_spaces : '未知'}</span></p>
                       ` : '';
             const cardContent = `
-                        ${pinButton}
+                        ${pinButtonHtml}
                         <h3>${station.name || '未知站點'}</h3>
                         <p class="distance">距離: ${displayDistance}</p>
                         <p>地址: ${station.address || '未知地址'}</p>
                         ${vehicleInfoHtml}
                     `;
-            const card = document.createElement('div');
-            card.className = 'station';
-            card.dataset.id = station.id;
-            card.dataset.lat = station.coords[0];
-            card.dataset.lng = station.coords[1];
-            card.style.width = window.innerWidth < 768 ? (window.innerWidth < 480 ? "100%" : "calc(50% - 10px)") : "calc(33% - 14px)";
-            card.innerHTML = cardContent;
-            card.addEventListener("click", () => {
-              const lat = parseFloat(station.coords[0]), lng = parseFloat(station.coords[1]);
-              if (!isNaN(lat) && !isNaN(lng)) {
-                const googleMapsUrl = `https://www.google.com/maps?q=${lat},${lng}`;
-                window.open(googleMapsUrl, "_blank");
-              } else {
-                showModal("站點座標無效，無法開啟地圖。");
-              }
-            });
-            resultsDiv.appendChild(card);
+            if (card) {
+              // 更新已存在卡片
+              card.innerHTML = cardContent;
+              card.dataset.lat = station.coords[0];
+              card.dataset.lng = station.coords[1];
+              card.style.width = window.innerWidth < 768 ? (window.innerWidth < 480 ? "100%" : "calc(50% - 10px)") : "calc(33% - 14px)";
+            } else {
+              // 建立新的卡片
+              card = document.createElement('div');
+              card.className = 'station';
+              card.dataset.id = station.id;
+              card.dataset.lat = station.coords[0];
+              card.dataset.lng = station.coords[1];
+              card.style.width = window.innerWidth < 768 ? (window.innerWidth < 480 ? "100%" : "calc(50% - 10px)") : "calc(33% - 14px)";
+              card.innerHTML = cardContent;
+              card.addEventListener("click", () => {
+                const lat = parseFloat(station.coords[0]), lng = parseFloat(station.coords[1]);
+                if (!isNaN(lat) && !isNaN(lng)) {
+                  window.open(`https://www.google.com/maps?q=${lat},${lng}`, "_blank");
+                } else {
+                  showModal("站點座標無效，無法開啟地圖。");
+                }
+              });
+              resultsDiv.appendChild(card);
+            }
+          });
+          // 移除不再存在的卡片
+          const validIds = organizedOutput.map(item => item.station_info.id);
+          Array.from(resultsDiv.children).forEach(card => {
+            if (!validIds.includes(card.dataset.id)) {
+              resultsDiv.removeChild(card);
+            }
           });
           updateResultsOrder();
           // 新增：等待一次事件迴圈，確保卡片 DOM 更新完成
           await new Promise(resolve => setTimeout(resolve, 0));
 
           dataLoaded = true; // 資料已載入完成
-          showMainContent();
+          if (showLoadingIndicator) {
+            // 僅在手動觸發時顯示 mainContent，避免自動更新時捲動畫面
+            showMainContent();
+          }
         } catch (error) {
           console.error("Fetch error:", error);
           resultsDiv.innerHTML = `發生錯誤: ${error.message}`;
@@ -999,56 +1012,63 @@
           searchYouBike(false);
         }
       }, 60000);
-      let deferredPrompt;
-      document.addEventListener('DOMContentLoaded', () => {
-        window.addEventListener('beforeinstallprompt', (e) => {
-          e.preventDefault();
-          deferredPrompt = e;
-          document.getElementById('installButton').style.display = 'block';
-        });
-        document.getElementById('installButton').addEventListener('click', async () => {
-          try {
-            if (deferredPrompt) {
-              await deferredPrompt.prompt();
-              const { outcome } = await deferredPrompt.userChoice;
-              console.log('User response to the install prompt:', outcome);
-              deferredPrompt = null;
-            } else if (window.matchMedia('(display-mode: standalone)').matches) {
-              alert("App 已在運行中。");
-            } else {
-              const errorMessage = 'App 已安裝，請從主畫面或開始清單中打開應用程式。';
-              console.error('PWA button error:', errorMessage, { deferredPrompt: deferredPrompt, displayMode: window.matchMedia('(display-mode: standalone)').matches, userAgent: navigator.userAgent, manifestHref: document.querySelector('link[rel="manifest"]')?.href });
-              alert(errorMessage);
-            }
-          } catch (error) {
-            console.error('安裝按鈕發生錯誤:', error);
-          }
-        });
-      });
-      window.addEventListener('appinstalled', () => {
-        console.log('App 已安裝');
-        deferredPrompt = null;
-        const installBtn = document.getElementById('installButton');
-        installBtn.innerHTML = '<img src="https://potatosserver.github.io/YouBike/icons/open.png" alt="開啟" />';
-      });
-      document.querySelector('h1').addEventListener('click', function() {
-        keywordInput.value = '';
-        searchYouBike();
-      });
-      const searchIcon = document.getElementById('searchIcon');
-      searchIcon.addEventListener('click', searchYouBike);
+      // 新增：統一更新 PWA 按鈕圖示的函式
+function updateInstallButton() {
+    const installBtn = document.getElementById('installButton');
+    if (deferredPrompt) {
+        installBtn.innerHTML = '<img src="https://potatosserver.github.io/YouBike/icons/install.png" alt="安裝" style="width:45px; height:45px;" />';
+        installBtn.title = "安裝應用程式";
+        installBtn.style.display = 'block';
+    } else {
+        installBtn.style.display = 'none';
+    }
+}
 
-      // 修改 window.load 事件，僅在資料未載入完成時才強制呼叫 showMainContent
-      window.addEventListener('load', () => {
-        if (!dataLoaded) {
-          // 若主要內容未載入完成，延遲一段時間後再呼叫 showMainContent
-          setTimeout(() => {
-            if (!dataLoaded) { 
-              showMainContent();
+let deferredPrompt;
+document.addEventListener('DOMContentLoaded', () => {
+    // 呼叫統一的更新函式
+    updateInstallButton();
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        document.getElementById('installButton').style.display = 'block';
+        updateInstallButton();  // 更新後台邏輯
+    });
+    document.getElementById('installButton').addEventListener('click', async () => {
+        try {
+            if (deferredPrompt) {
+                await deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log('User response to the install prompt:', outcome);
+                deferredPrompt = null;
+            } else if (window.matchMedia('(display-mode: standalone)').matches) {
+                alert("App 已在運行中。");
+            } else {
+                const errorMessage = 'App 已安裝，請從主畫面或開始清單中打開應用程式。';
+                console.error('PWA button error:', errorMessage, { deferredPrompt, displayMode: window.matchMedia('(display-mode: standalone)').matches, userAgent: navigator.userAgent, manifestHref: document.querySelector('link[rel="manifest"]')?.href });
+                alert(errorMessage);
             }
-          }, 3000);
+            updateInstallButton();  // 點擊後更新狀態
+        } catch (error) {
+            console.error('安裝按鈕發生錯誤:', error);
         }
-      });
+    });
+});
+
+// appinstalled 事件中同樣更新
+window.addEventListener('appinstalled', () => {
+    console.log('App 已安裝');
+    deferredPrompt = null;
+    updateInstallButton();
+});
+
+document.querySelector('h1').addEventListener('click', function() {
+    keywordInput.value = '';
+    searchYouBike();
+});
+const searchIcon = document.getElementById('searchIcon');
+searchIcon.addEventListener('click', searchYouBike);
+
     </script>
   </body>
 </html>
