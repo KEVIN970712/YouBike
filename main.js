@@ -8,10 +8,9 @@ fetch('https://apis.youbike.com.tw/json/station-min-yb2.json', {
         // 您可以先不加這兩個標頭，測試是否能成功獲取資料。
         // 'if-modified-since': 'Sat, 03 May 2025 09:40:26 GMT',
         // 'if-none-match': 'W/"6815e48a-358846"',
-        'origin': 'https://www.youbike.com.tw', // 這裡可能需要改成您網站的 origin
-        'referer': 'https://www.youbike.com.tw/', // 這裡可能需要改成您網站的 referer
+        'origin': 'https://kevin970712.github.io/YouBike/', 
+        'referer': 'https://kevin970712.github.io/YouBike/', 
         // 其他 sec-ch-ua, sec-fetch 等標頭通常由瀏覽器自動管理
-        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36', // 這裡可以根據需要修改或移除
     }
 })
 .then(response => {
