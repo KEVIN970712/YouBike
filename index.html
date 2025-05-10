@@ -1,25 +1,16 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
   <head>
+    <meta name="google-site-verification" content="9o55RpXAKN7kR9cYHHvHkWuktV3JVcCYF5mt9XZULCY" />
     <meta charset="UTF-8" />
+    <meta name="author" content="卓稟鈞(AndrewCho)">
+    <meta name="description" content="一個專為 YouBike 設計的簡單、美觀且低流量站點搜尋器，提供快速查詢站點資訊功能，滿足即時需求，適合所有用戶使用。">    
+    <meta name="keywords" content="YouBike, youBike, YouBike2.0, youBike2.0, ubike, ibike, obike, kbike, 公共自行車, YouBike站點搜尋, 站點搜尋, YouBike 資訊, 附近站點, 附近YouBike站點, 全台YouBike, 台北YouBike, 新北YouBike, 桃園YouBike, 新竹YouBike, 苗栗YouBike, 臺中YouBike, 嘉義YouBike , 臺南YouBike, 高雄YouBike, 屏東YouBike, 臺東YouBike , YouBike即時資訊, 定位功能, Github, github.io" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>高雄 YouBike 站點搜尋</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet" />
+    <title>YouBike 站點搜尋 : 一個簡單、美觀、低流量的YouBike站點搜尋器</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="manifest" href="/YouBike/manifest.json" />
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function () {
-          navigator.serviceWorker
-            .register("../YouBike/service-worker.js")
-            .then(function (registration) {
-              console.log('Service Worker registered with scope:', registration.scope);
-            })
-            .catch(function (error) {
-              console.error('Service Worker registration failed:', error);
-            });
-        });
-      }
-    </script>
     <style>
       body {
         font-family: 'Noto Sans TC', Arial, sans-serif;
@@ -163,6 +154,8 @@
         display: none;
         opacity: 0;
         transition: opacity 0.5s ease;
+        white-space: nowrap;  /* 新增: 避免文字換行 */
+        width: auto;         /* 新增: 動態調整寬度 */
       }
       #loading.show {
         opacity: 1;
@@ -198,7 +191,8 @@
         display: block;
       }
       .modal button {
-        margin-top: 10px;
+        margin: 10px auto;
+        display: block;
         padding: 10px 20px;
         background-color: #007BFF;
         color: white;
@@ -261,6 +255,11 @@
       }
       body.dark-mode #loadingText {
         color: #ffffff;
+      }
+      body.dark-mode #noticeBox {
+        background-color: #000;
+        color: #000;
+        border: 1px solid #444;
       }
       #toggleDarkMode {
         position: fixed;
@@ -418,27 +417,160 @@
         height: 45px;
         object-fit: contain;
       }
-      
+      #extraButtons {
+          position: fixed;
+          bottom: 120px;
+          right: 80px;
+          transform: translateX(100%);
+          transition: transform 0.5s ease;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          z-index: 1000;
+      }
+      #extraButtons.show {
+          transform: translateX(0);
+      }
+      #extraButtons a {
+          width: 50px;
+          height: 50px;
+          background-color: white;
+          color: black;
+          border: none;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+          text-decoration: none;
+          transition: background-color 0.3s ease;
+      }
+      #extraButtons a:hover {
+          background-color: #f0f0f0;
+      }
+      @keyframes popUp {
+          0% { transform: translateX(100%) scale(0.5); opacity: 0; }
+          100% { transform: translateX(0) scale(1); opacity: 1; }
+      }
+      @keyframes popDown {
+          0% { transform: translateX(0) scale(1); opacity: 1; }
+          100% { transform: translateX(100%) scale(0.5); opacity: 0; }
+      }
+      #extraButtons {
+          position: fixed;
+          bottom: 120px;
+          right: 80px;
+          transform: translateX(100%) scale(0.5);
+          opacity: 0;
+          transition: transform 0.5s ease, opacity 0.5s ease;
+          display: flex;
+          flex-direction: row;
+          gap: 10px;
+          z-index: 1000;
+      }
+      #extraButtons.show {
+          transform: translateX(0) scale(1);
+          opacity: 1;
+          animation: popUp 0.5s forwards;
+      }
+      #extraButtons.hiding {
+          animation: popDown 0.5s forwards;
+      }
+      #extraButtons a {
+          width: 50px;
+          height: 50px;
+          background-color: white;
+          color: black;
+          border: none;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+          text-decoration: none;
+          transition: background-color 0.3s ease;
+      }
+      #extraButtons a:hover {
+          background-color: #f0f0f0;
+      }
+      #extraButtons.hiding {
+          animation: popDown 0.5s forwards;
+      }
+      #settingsPanel {
+          position: fixed;
+          bottom: 60px;
+          right: 80px; /* 調整至適合位置 */
+          display: flex;
+          flex-direction: row;
+          gap: 10px;
+          z-index: 1000;
+          transform: translateX(100%) scale(0.5);
+          opacity: 0;
+          transition: transform 0.5s ease, opacity 0.5s ease;
+      }
+      #settingsPanel.show {
+          transform: translateX(0) scale(1);
+          opacity: 1;
+          animation: popUpSettings 0.5s forwards;
+      }
+      #darkModeToggle {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 50px;
+          height: 50px;
+          background: linear-gradient(135deg, #007BFF, #0056b3);
+          border: none;
+          color: white;
+          border-radius: 50%;
+          cursor: pointer;
+          font-size: 24px;
+          transition: background 0.3s ease, transform 0.2s ease;
+      }
+      #darkModeToggle:hover, #langToggle:hover {
+          background-color: #f0f0f0;
+          transform: scale(1.1);
+      }
+      /* 新增針對 settingsPanel 的動畫 */
+      @keyframes popUpSettings {
+          0% { transform: translateX(150%) scale(0.5); opacity: 0; }
+          100% { transform: translateX(0) scale(1); opacity: 1; }
+      }
+      /* 新增 settingsPanel 收合動畫 */
+      @keyframes popDownSettings {
+          0% { transform: translateX(0) scale(1); opacity: 1; }
+          100% { transform: translateX(150%) scale(0.5); opacity: 0; }
+      }
+
+      #settingsPanel.hiding {
+          animation: popDownSettings 0.5s forwards;
+      }
+      #updateCountdown {
+          white-space: nowrap;
+      }
+
     </style>
   </head>
   <body>
     <div id="loadingOverlay">
       <div id="loadingContent">
-        <p id="loadingText">載入中</p>
+        <h2 id="loadingText">載入中</h2>
+        <div id="noticeBox" style="margin-top: 10px; margin-left: 20px; margin-right: 20px; background: #fff; padding: 10px; border: 1px solid #ccc; border-radius: 5px;"></div>
       </div>
     </div>
     <div id="mainContent" style="display:none;">
-      <h1>高雄 YouBike 搜尋</h1>
+      <!-- 更新標題元素：改為使用 id 並移除硬編碼文字 -->
+      <h1 id="heading"></h1>
       <div id="searchContainer">
         <input type="text" id="keyword" placeholder="請輸入站點名稱、地址" value="" />
         <span id="searchIcon" title="搜尋">🔍</span>
       </div>
-      <div id="locationSwitchContainer" style="text-align: center; margin: 10px 0;">
-        <label class="switch">
-          <input type="checkbox" id="toggleUseLocation" />
+      <div id="locationSwitchContainer" style="display: flex; align-items: center; justify-content: center; margin: 10px 0;">
+        <label class="switch" style="margin: 0;">
+          <input type="checkbox" id="toggleUseLocation" aria-labelledby="locationSwitchText">
           <span class="slider"></span>
         </label>
-        <span style="margin-left:10px;">使用定位</span>
+        <span id="locationSwitchText" style="margin-left: 10px;"></span>
       </div>
       <div id="results"></div>
       <div id="loading">載入中，請稍候...</div>
@@ -447,23 +579,39 @@
         <p id="modalText"></p>
         <button id="modalButton">確定</button>
       </div>
-      <a href="https://github.com/potatosserver/YouBike" target="_blank" title="GitHub Repository">
-        <button id="githubButton" style="position: fixed; bottom: 80px; right: 20px; z-index: 1000; width: 50px; height: 50px; background: white; color: black; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;">
-          <img src="https://potatosserver.github.io/YouBike/icons/github.png" alt="GitHub" style="width:35px; height:35px;" />
+      <div id="extraButtons">
+          <a href="https://github.com/potatosserver/YouBike" target="_blank">
+              <img loading="lazy" src="https://potatosserver.github.io/YouBike/icons/html.webp" alt="YouBike Repo" style="width:30px; height:30px;" />
+          </a>
+          <a href="https://github.com/potatosserver/YouBike_Python" target="_blank">
+                <img loading="lazy" src="https://potatosserver.github.io/YouBike/icons/python.webp" alt="YouBike Python" style="width:30px; height:30px;" />
+          </a>
+      </div>
+      </div>
+      <a id="githubLink" title="GitHub Repository">
+        <button id="githubButton" style="position: fixed; bottom: 120px; right: 20px; z-index: 1000; width: 50px; height: 50px; background: white; color: black; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+          <img loading="lazy" src="https://potatosserver.github.io/YouBike/icons/github.webp" alt="GitHub" style="width:35px; height:35px;" />
         </button>
       </a>
-      <button id="installButton" style="position: fixed; bottom: 140px; right: 20px; z-index: 1000; width: 50px; height: 50px; background: white; color: black; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;">
-        <img src="https://potatosserver.github.io/YouBike/icons/install.png" alt="安裝" style="width:45px; height:45px;" />
+      <button id="installButton" style="position: fixed; bottom: 180px; right: 20px; z-index: 1000; width: 50px; height: 50px; background: white; color: black; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+        <img loading="lazy" src="https://potatosserver.github.io/YouBike/icons/install.webp" alt="安裝" style="width:45px; height:45px;" />
       </button>
-      <button id="toggleDarkMode" title="切換暗色模式">🌙</button>
+      <button id="settingsButton" title="設定" style="position: fixed; bottom: 60px; right: 20px; z-index: 1200; width: 50px; height: 50px; background: white; color: black; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 24px; transition: transform 0.2s ease;">⚙️</button>
+      <div id="settingsPanel">
+        <button id="darkModeToggle" title="切換暗色模式">🌙</button>
+        <button id="langToggle" title="Switch Language" style="width:50px; height:50px; border-radius:50%; margin-left:5px; display:flex; align-items:center; justify-content:center;">
+          <img loading="lazy" src="https://potatosserver.github.io/YouBike/icons/translate.webp" alt="Translate" style="width:35px; height:35px;" />
+        </button>
+      </div>
     </div>
+    <button id="updateCountdown" style="display:none; position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); z-index: 1000; padding: 6px 12px; background-color: white; color: #007bff; border: 2px solid #007bff; border-radius: 25px; font-size: 0.8em; box-shadow: 0 2px 6px rgba(0,0,0,0.2); transition: all 0.3s ease; width: 100px;">60秒後更新</button>
     <script>
       let userLocation = null;
       let sortingLocked = false;
       let initialLoad = true;
       let locationDenied = false;
       let geolocationErrorMessage = null;
-      let dataLoaded = false; // 新增：記錄資料是否已載入完成
+      let dataLoaded = false;
       const defaultLatitude = 22.6315725;
       const defaultLongitude = 120.3025079;
       const overlay = document.querySelector('.overlay');
@@ -512,19 +660,20 @@
           const overlay = document.getElementById("loadingOverlay");
           const mainContent = document.getElementById("mainContent");
           if (navigator.onLine) {
-            // 線上模式，原有動畫
             overlay.style.opacity = "0";
             setTimeout(() => {
               overlay.style.display = "none";
               mainContent.style.display = "block";
+              document.getElementById('updateCountdown').style.display = "block";
             }, 500);
           } else {
-            // 離線模式，更新訊息並延後隱藏
-            document.getElementById("loadingText").textContent = "離線模式啟動中...";
-            overlay.style.opacity = "1"; // 確保 Loading 畫面清晰可見
+            const lang = localStorage.getItem("lang") || "zh";
+            document.getElementById("loadingText").textContent = lang === "en" ? "Offline mode starting..." : "離線模式啟動中...";
+            overlay.style.opacity = "1"; 
             setTimeout(() => {
               overlay.style.display = "none";
               mainContent.style.display = "block";
+              document.getElementById('updateCountdown').style.display = "block";
             }, 3000);
           }
           mainContentShown = true;
@@ -532,59 +681,94 @@
       }
       (function simulateLoadingPercentage() {
         const loadingText = document.getElementById("loadingText");
+        let lang = localStorage.getItem("lang") || "zh";
+        let prefix = lang === "en" ? "Loading:" : "載入中：";
         let progress = 0;
         let lockedProgress = null;
         loadingTextInterval = setInterval(() => {
           if (!mainContentShown) {
             if (progress < 85) {
               progress++;
-              loadingText.textContent = "載入中：" + progress + "%";
+              loadingText.textContent = prefix + progress + "%";
             } else {
               if (lockedProgress === null) {
                 lockedProgress = 85 + Math.floor(Math.random() * 11);
               }
-              loadingText.textContent = "載入中：" + lockedProgress + "%";
+              loadingText.textContent = prefix + lockedProgress + "%";
             }
           } else {
             clearInterval(loadingTextInterval);
           }
         }, 50);
       })();
-      let kcgDataCache = null; // 用於緩存第一個 API 的資料
+      (function showRandomNotice(){
+        let lang = localStorage.getItem("lang") || "zh";
+        const notices = lang === "en" ? [
+              "❌Do not speed or ride in reverse",
+              "❌Do not change lanes arbitrarily on sidewalks",
+              "❌Do not use your phone while riding",
+              "❌Avoid harsh braking while riding",
+              "✔️Remember to adjust the seat to a proper height",
+              "✔️Ensure that both front and rear lights are working",
+              "✔️Remember to get bicycle accident insurance",
+              "✔️Take your belongings from the basket"
+        ] : [
+              "❌勿超速或逆向騎乘",
+              "❌勿隨意變換車道在行人道上騎乘",
+              "❌勿在車輛行駛中使用手機",
+              "❌騎乘中勿緊急煞車",
+              "✔️記得調整座墊至適宜高度",
+              "✔️確認前後車燈功能正常",
+              "✔️記得投保公共自行車傷害險",
+              "✔️記得帶走置物籃內的隨身物品"
+        ];
+        const randomIndex = Math.floor(Math.random() * notices.length);
+        document.getElementById('noticeBox').textContent = notices[randomIndex];
+      })();
+      
+      let youbikeDataCache = null;
 
       async function searchYouBike(showLoadingIndicator = true) {
         if (showLoadingIndicator) showLoading();
         const keyword = keywordInput.value.trim().toLowerCase();
         try {
-          // 新增離線模式判斷與快取讀取
           if (navigator.onLine) {
-            if (!kcgDataCache) {
-              // 第一次載入時請求第1個 API
-              const kcgUrl = "https://api.kcg.gov.tw/api/service/Get/b4dd9c40-9027-4125-8666-06bef1756092";
-              const kcgResponse = await fetch(kcgUrl, {
-                headers: { "User-Agent": "Mozilla/5.0" }
+            if (!youbikeDataCache) {
+              const youbikeUrl = "https://apis.youbike.com.tw/json/station-min-yb2.json";
+              const response = await fetch(youbikeUrl, {
+                headers : {
+                  'accept': '*/*',
+                  'accept-language': 'zh-TW,zh;q=0.9',
+                }
               });
-              if (!kcgResponse.ok) throw new Error(`HTTP error! status: ${kcgResponse.status}`);
-              const kcgData = await kcgResponse.json();
-              kcgDataCache = kcgData?.data?.data?.retVal || [];
-              // 將取得的資料儲存至 localStorage
-              localStorage.setItem('cachedKcgData', JSON.stringify(kcgDataCache));
+              if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+              const youbikeData = await response.json();
+              youbikeDataCache = Array.isArray(youbikeData)
+                ? youbikeData.map(item => ({ ...item, lat: parseFloat(item.lat), lng: parseFloat(item.lng) }))
+                : [];
+              localStorage.setItem('cachedYoubikeData', JSON.stringify(youbikeDataCache));
             }
           } else {
-            if (!kcgDataCache) {
-              // 從 localStorage 讀取之前儲存的第1個 API 資料
-              kcgDataCache = JSON.parse(localStorage.getItem('cachedKcgData') || '[]');
+            if (!youbikeDataCache) {
+              youbikeDataCache = JSON.parse(localStorage.getItem('cachedYoubikeData') || '[]').map(item => ({
+                ...item,
+                lat: parseFloat(item.lat),
+                lng: parseFloat(item.lng)
+              }));
             }
           }
-          let kcgResults = kcgDataCache;
+          let youbikeResults = youbikeDataCache;
           if (keyword) {
-            kcgResults = kcgResults.filter(station => {
-              const stationName = station.sna ? station.sna.toLowerCase() : '';
-              const stationAddress = station.ar ? station.ar.toLowerCase() : '';
-              return stationName.includes(keyword) || stationAddress.includes(keyword);
+            youbikeResults = youbikeResults.filter(station => {
+              const stationNameTW = station.name_tw ? station.name_tw.toLowerCase() : '';
+              const stationAddressTW = station.address_tw ? station.address_tw.toLowerCase() : '';
+              const stationNameEN = station.name_en ? station.name_en.toLowerCase() : '';
+              const stationAddressEN = station.address_en ? station.address_en.toLowerCase() : '';
+              return stationNameTW.includes(keyword) || stationAddressTW.includes(keyword) ||
+                     stationNameEN.includes(keyword) || stationAddressEN.includes(keyword);
             });
           }
-          kcgResults = kcgResults.sort((a, b) => {
+          youbikeResults = youbikeResults.sort((a, b) => {
             const distA = calculateDistance(
               userLocation ? userLocation.latitude : defaultLatitude,
               userLocation ? userLocation.longitude : defaultLongitude,
@@ -600,8 +784,8 @@
           let limit = keyword ? 50 : 20;
           let usedStations;
           if (!keyword) {
-            const pinnedFromLocal = kcgResults.filter(station => pinnedStations.has(String(station.sno)));
-            const unpinned = kcgResults.filter(station => !pinnedStations.has(String(station.sno)));
+            const pinnedFromLocal = youbikeResults.filter(station => pinnedStations.has(String(station.station_no)));
+            const unpinned = youbikeResults.filter(station => !pinnedStations.has(String(station.station_no)));
             pinnedFromLocal.sort((a, b) => {
               const distA = calculateDistance(
                 userLocation ? userLocation.latitude : defaultLatitude,
@@ -630,9 +814,9 @@
             });
             usedStations = [...pinnedFromLocal, ...unpinned].slice(0, limit);
           } else {
-            usedStations = kcgResults.slice(0, limit);
-            const pinnedList = usedStations.filter(station => pinnedStations.has(String(station.sno)));
-            const nonPinnedList = usedStations.filter(station => !pinnedStations.has(String(station.sno)));
+            usedStations = youbikeResults.slice(0, limit);
+            const pinnedList = usedStations.filter(station => pinnedStations.has(String(station.station_no)));
+            const nonPinnedList = usedStations.filter(station => !pinnedStations.has(String(station.station_no)));
             pinnedList.sort((a, b) => {
               const distA = calculateDistance(
                 userLocation ? userLocation.latitude : defaultLatitude,
@@ -663,23 +847,22 @@
           }
           const isOnline = navigator.onLine;
           let vehData = {};
-          const stationIds = usedStations.map(station => String(station.sno));
+          const stationIds = usedStations.map(station => String(station.station_no));
           if (isOnline) {
-            vehData = await queryVehicleData(stationIds); // 線上模式取得車子資訊
+            vehData = await queryVehicleData(stationIds);
           }
+          // 修改站點資訊依語言切換: 若為英文則取英文屬性
           const organizedOutput = usedStations.map(site => {
             const info = {
-              id: String(site.sno),
-              name: site.sna,
+              id: String(site.station_no),
+              name: currentLang === "en" ? site.name_en : site.name_tw,
               coords: [site.lat, site.lng],
-              district: site.sarea,
-              address: site.ar
+              district: currentLang === "en" ? site.district_en : site.district_tw,
+              address: currentLang === "en" ? site.address_en : site.address_tw
             };
             const vehicle = isOnline ? (Object.entries(vehData).find(([key]) => key === info.id)?.[1] || {}) : {};
             return { station_info: info, vehicle_info: vehicle };
           });
-          // 將下列重建 DOM 的邏輯改成更新已存在的 DOM
-          // 原本的： resultsDiv.innerHTML = ''; ... 建立所有卡片 ...
           organizedOutput.forEach(item => {
             const station = item.station_info;
             const vehicle = item.vehicle_info;
@@ -691,27 +874,34 @@
               station.coords[0],
               station.coords[1]
             );
-            const displayDistance = distance < 1 ? Math.round(distance * 1000) + " 公尺" : distance.toFixed(2) + " 公里";
+            const displayDistance = distance < 1 ? Math.round(distance * 1000) + (currentLang === "en" ? " m" : " 公尺")
+                                                 : distance.toFixed(2) + (currentLang === "en" ? " km" : " 公里");
+            const distanceLabel = currentLang === "en" ? "Distance:" : "距離:";
+            const addressLabel = currentLang === "en" ? "Address:" : "地址:";
+            const slotsLabel = currentLang === "en" ? "Available Slots:" : "可停空位數:";
+            const unknownStation = currentLang === "en" ? "Unknown Station" : "未知站點";
+            const unknownAddress = currentLang === "en" ? "Unknown Address" : "未知地址";
+            const unknownValue = currentLang === "en" ? "Unknown" : "未知";
             const vehicleInfoHtml = isOnline ? `
-                        <p>YouBike 2.0: <span class="vehicle_yb2">${vehicle?.available_2_0 !== undefined ? vehicle.available_2_0 : '未知'}</span></p>
-                        <p>YouBike 2.0E: <span class="vehicle_ybe">${vehicle?.available_e !== undefined ? vehicle.available_e : '未知'}</span></p>
-                        <p>可停空位數: <span class="vehicle_empty">${vehicle?.empty_spaces !== undefined ? vehicle.empty_spaces : '未知'}</span></p>
-                      ` : '';
+                          <p>YouBike 2.0: <span class="vehicle_yb2">${vehicle?.available_2_0 !== undefined ? vehicle.available_2_0 : unknownValue}</span></p>
+                          <p>YouBike 2.0E: <span class="vehicle_ybe">${vehicle?.available_e !== undefined ? vehicle.available_e : unknownValue}</span></p>
+                          <p>${slotsLabel} <span class="vehicle_empty">${vehicle?.empty_spaces !== undefined ? vehicle.empty_spaces : unknownValue}</span></p>
+                        ` : '';
+            // 當使用預設座標時不顯示距離
+            const isDefaultLocation = userLocation && userLocation.latitude === defaultLatitude && userLocation.longitude === defaultLongitude;
+            const distanceHTML = !isDefaultLocation ? `<p class="distance">${distanceLabel} ${displayDistance}</p>` : "";
             const cardContent = `
-                        ${pinButtonHtml}
-                        <h3>${station.name || '未知站點'}</h3>
-                        <p class="distance">距離: ${displayDistance}</p>
-                        <p>地址: ${station.address || '未知地址'}</p>
-                        ${vehicleInfoHtml}
-                    `;
+                          <h3>${station.name || unknownStation}</h3>
+                          ${distanceHTML}
+                          <p>${addressLabel} ${station.address || unknownAddress}</p>
+                          ${vehicleInfoHtml}
+                      `;
             if (card) {
-              // 更新已存在卡片
               card.innerHTML = cardContent;
               card.dataset.lat = station.coords[0];
               card.dataset.lng = station.coords[1];
               card.style.width = window.innerWidth < 768 ? (window.innerWidth < 480 ? "100%" : "calc(50% - 10px)") : "calc(33% - 14px)";
             } else {
-              // 建立新的卡片
               card = document.createElement('div');
               card.className = 'station';
               card.dataset.id = station.id;
@@ -724,13 +914,12 @@
                 if (!isNaN(lat) && !isNaN(lng)) {
                   window.open(`https://www.google.com/maps?q=${lat},${lng}`, "_blank");
                 } else {
-                  showModal("站點座標無效，無法開啟地圖。");
+                  showModal(currentLang === "en" ? "Invalid station coordinates, cannot open map." : "站點座標無效，無法開啟地圖。");
                 }
               });
               resultsDiv.appendChild(card);
             }
           });
-          // 移除不再存在的卡片
           const validIds = organizedOutput.map(item => item.station_info.id);
           Array.from(resultsDiv.children).forEach(card => {
             if (!validIds.includes(card.dataset.id)) {
@@ -738,12 +927,10 @@
             }
           });
           updateResultsOrder();
-          // 新增：等待一次事件迴圈，確保卡片 DOM 更新完成
           await new Promise(resolve => setTimeout(resolve, 0));
 
-          dataLoaded = true; // 資料已載入完成
+          dataLoaded = true;
           if (showLoadingIndicator) {
-            // 僅在手動觸發時顯示 mainContent，避免自動更新時捲動畫面
             showMainContent();
           }
         } catch (error) {
@@ -862,16 +1049,24 @@
         let errorMessage = "";
         switch (error.code) {
           case error.PERMISSION_DENIED:
-            errorMessage = "未提供定位權限，將使用捷運美麗島站作為中心定位。";
+            errorMessage = currentLang === "en" 
+              ? "Location permission was denied; using default coordinates." 
+              : "未提供定位權限，將使用預設座標進行定位。";
             break;
           case error.POSITION_UNAVAILABLE:
-            errorMessage = "定位資訊不可用，將使用捷運美麗島站作為中心定位直到定位成功。";
+            errorMessage = currentLang === "en" 
+              ? "Location information is unavailable; using default coordinates until the location is determined." 
+              : "定位資訊不可用，將使用預設座標進行定位直到定位成功。";
             break;
           case error.TIMEOUT:
-            errorMessage = "定位逾時，將使用捷運美麗島站作為中心定位直到定位成功。";
+            errorMessage = currentLang === "en" 
+              ? "The location request timed out; using default coordinates until a successful location is acquired." 
+              : "定位逾時，將使用預設座標進行定位直到定位成功。";
             break;
           default:
-            errorMessage = "定位錯誤，將使用捷運美麗島站作為中心定位直到定位成功。";
+            errorMessage = currentLang === "en" 
+              ? "A location error occurred; using default coordinates until a valid location is determined." 
+              : "定位錯誤，將使用預設座標進行定位直到定位成功。";
             break;
         }
         showModal(errorMessage);
@@ -920,7 +1115,7 @@
             },
             {
               enableHighAccuracy: true,
-              timeout: 10000,
+              timeout: 10000, // 最大等待10秒
               maximumAge: 0
             }
           );
@@ -938,7 +1133,7 @@
             }
           }, 10000);
         } else {
-          showModal("您的瀏覽器不支援地理位置功能。站點將以預設地點 (捷運美麗島站) 為中心顯示。");
+          showModal("您的瀏覽器不支援地理位置功能。站點將以將使用預設座標進行定位。");
           userLocation = { latitude: defaultLatitude, longitude: defaultLongitude };
           searchYouBike();
           hideLoading();
@@ -955,8 +1150,16 @@
             lat, lng
           );
           const distanceEl = card.querySelector('.distance');
+          // 當使用預設座標時，隱藏距離顯示
           if (distanceEl) {
-            distanceEl.textContent = "距離: " + (newDistance < 1 ? Math.round(newDistance * 1000) + " 公尺" : newDistance.toFixed(2) + " 公里");
+            if (userLocation && userLocation.latitude === defaultLatitude && userLocation.longitude === defaultLongitude) {
+              distanceEl.textContent = "";
+            } else {
+              const distanceLabel = currentLang === "en" ? "Distance:" : "距離:";
+              const unit = newDistance < 1 ? (currentLang === "en" ? " m" : " 公尺") : (currentLang === "en" ? " km" : " 公里");
+              const displayDistance = newDistance < 1 ? Math.round(newDistance * 1000) : newDistance.toFixed(2);
+              distanceEl.textContent = distanceLabel + " " + displayDistance + unit;
+            }
           }
         });
         updateResultsOrder();
@@ -983,40 +1186,107 @@
             console.error("Vehicle data update failed:", error);
           });
       }
-      const toggleDarkModeButton = document.getElementById('toggleDarkMode');
-      toggleDarkModeButton.addEventListener('click', () => {
+      const darkModeToggle = document.getElementById('darkModeToggle');
+      darkModeToggle.addEventListener('click', () => {
         document.body.classList.toggle('dark-mode');
         const isDark = document.body.classList.contains("dark-mode");
         localStorage.setItem("dark_mode", isDark);
-        toggleDarkModeButton.innerHTML = isDark ? '<span style="color:#ffd700; font-size:32px;">☀️</span>' : '🌙';
+        darkModeToggle.innerHTML = isDark ? '<span style="color:#ffd700; font-size:32px;">☀️</span>' : '🌙';
       });
       if (localStorage.getItem("dark_mode") === "true") {
         document.body.classList.add("dark-mode");
-        toggleDarkModeButton.innerHTML = '<span style="color:#ffd700; font-size:32px;">☀️</span>';
+        darkModeToggle.innerHTML = '<span style="color:#ffd700; font-size:32px;">☀️</span>';
       }
+      
+      // 設定目前語言，預設為中文
+      let currentLang = localStorage.getItem("lang") || "zh";
+      
+      // 更新頁面上所有與定位開關相關的文字，確保英文模式下不顯示中文
+      function updateLanguageTexts() {
+        document.title = currentLang === "en" ? "YouBike Site Search : A simple, beautiful site search engine" : "YouBike 站點搜尋 : 一個簡單、美觀、低流量的YouBike站點搜尋器";
+        const locationSwitchSpan = document.querySelector('#locationSwitchText');
+        if (locationSwitchSpan) {
+          locationSwitchSpan.textContent = currentLang === "en" ? "Use Location" : "使用定位";
+        }
+        const heading = document.getElementById('heading');
+        if (heading) {
+            heading.textContent = currentLang === "en" ? "YouBike Station Search" : "YouBike 站點搜尋";
+        }
+        const keywordInput = document.getElementById('keyword');
+        if (keywordInput) {
+          keywordInput.placeholder = currentLang === "en" ? "Please enter station name or address" : "請輸入站點名稱、地址";
+        }
+        const updateCountdownBtn = document.getElementById('updateCountdown');
+        if (updateCountdownBtn) {
+          updateCountdownBtn.textContent = currentLang === "en" ? "60 sec update " : "60秒後更新";
+        }
+        const loadingDiv = document.getElementById('loading');
+        if (loadingDiv) {
+          loadingDiv.textContent = currentLang === "en" ? "Loading, please wait..." : "載入中，請稍候...";
+        }
+      }
+      updateLanguageTexts();
+      
+      // 語言切換按鈕事件：直接更新文字，不再重新載入頁面
+      const langToggle = document.getElementById('langToggle');
+      langToggle.addEventListener('click', (event) => {
+        event.stopPropagation();
+        currentLang = currentLang === "en" ? "zh" : "en";
+        localStorage.setItem("lang", currentLang);
+        updateLanguageTexts();
+        // 直接呼叫 searchYouBike 更新站點卡片文字，不顯示 loading 效果
+        searchYouBike(false);
+      });
+      
+      const settingsButton = document.getElementById('settingsButton');
+      const settingsPanel = document.getElementById('settingsPanel');
+      settingsButton.addEventListener('click', (event) => {
+        event.stopPropagation();
+        if (extraButtons.classList.contains('show')) {
+            extraButtons.classList.add('hiding');
+            setTimeout(() => {
+                extraButtons.classList.remove('show', 'hiding');
+            }, 500);
+        }
+        if (settingsPanel.classList.contains('show')) {
+          settingsPanel.classList.add('hiding');
+          setTimeout(() => {
+            settingsPanel.classList.remove('show', 'hiding');
+          }, 500);
+        } else {
+          settingsPanel.classList.add('show');
+        }
+      });
+      document.addEventListener('click', () => {
+        if (settingsPanel.classList.contains('show')) {
+          settingsPanel.classList.add('hiding');
+          setTimeout(() => {
+            settingsPanel.classList.remove('show', 'hiding');
+          }, 500);
+        }
+      });
+      settingsPanel.addEventListener('click', (event) => {
+        event.stopPropagation();
+      });
       modalButton.addEventListener('click', hideModal);
-      if (useLocation) {
-        getLocation();
-      } else {
-        userLocation = { latitude: defaultLatitude, longitude: defaultLongitude };
-        searchYouBike();
-      }
+      window.addEventListener('load', () => {
+        if (useLocation) {
+          getLocation();
+        } else {
+          userLocation = { latitude: defaultLatitude, longitude: defaultLongitude };
+          searchYouBike();
+        }
+      });
       keywordInput.addEventListener('keypress', function (event) {
         if (event.key === 'Enter') {
           searchYouBike();
         }
       });
-      setInterval(updateVehicleData, 60000);
-      setInterval(() => {
-        if (document.getElementById('toggleUseLocation').checked) {
-          searchYouBike(false);
-        }
-      }, 60000);
-      // 新增：統一更新 PWA 按鈕圖示的函式
+
 function updateInstallButton() {
     const installBtn = document.getElementById('installButton');
     if (deferredPrompt) {
-        installBtn.innerHTML = '<img src="https://potatosserver.github.io/YouBike/icons/install.png" alt="安裝" style="width:45px; height:45px;" />';
+        installBtn.innerHTML = '<img src="https://potatosserver.github.io/YouBike/icons/install.webp" alt="安裝" style="width:45px; height:45px;" />';
         installBtn.title = "安裝應用程式";
         installBtn.style.display = 'block';
     } else {
@@ -1026,13 +1296,12 @@ function updateInstallButton() {
 
 let deferredPrompt;
 document.addEventListener('DOMContentLoaded', () => {
-    // 呼叫統一的更新函式
     updateInstallButton();
     window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredPrompt = e;
         document.getElementById('installButton').style.display = 'block';
-        updateInstallButton();  // 更新後台邏輯
+        updateInstallButton();
     });
     document.getElementById('installButton').addEventListener('click', async () => {
         try {
@@ -1048,27 +1317,113 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error('PWA button error:', errorMessage, { deferredPrompt, displayMode: window.matchMedia('(display-mode: standalone)').matches, userAgent: navigator.userAgent, manifestHref: document.querySelector('link[rel="manifest"]')?.href });
                 alert(errorMessage);
             }
-            updateInstallButton();  // 點擊後更新狀態
+            updateInstallButton();
         } catch (error) {
             console.error('安裝按鈕發生錯誤:', error);
         }
     });
-});
 
-// appinstalled 事件中同樣更新
+    const extraButtons = document.getElementById('extraButtons');
+    const githubButton = document.getElementById('githubButton');
+    githubButton.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (settingsPanel.classList.contains('show')) {
+            settingsPanel.classList.add('hiding');
+            setTimeout(() => {
+                settingsPanel.classList.remove('show', 'hiding');
+            }, 500);
+        }
+        if (extraButtons.classList.contains('show')) {
+            extraButtons.classList.add('hiding');
+            setTimeout(() => {
+                extraButtons.classList.remove('show', 'hiding');
+            }, 500);
+        } else {
+            extraButtons.classList.add('show');
+        }
+      });
+    document.addEventListener('click', () => {
+        if(extraButtons.classList.contains('show')){
+            extraButtons.classList.remove('show');
+        }
+    });
+    window.addEventListener('scroll', () => {
+        if (extraButtons.classList.contains('show')) {
+            extraButtons.classList.add('hiding');
+            setTimeout(() => {
+                extraButtons.classList.remove('show', 'hiding');
+            }, 500);
+        }
+        if (settingsPanel.classList.contains('show')) {
+            settingsPanel.classList.add('hiding');
+            setTimeout(() => {
+                settingsPanel.classList.remove('show', 'hiding');
+            }, 500);
+        }
+    });
+});
 window.addEventListener('appinstalled', () => {
     console.log('App 已安裝');
     deferredPrompt = null;
     updateInstallButton();
 });
-
-document.querySelector('h1').addEventListener('click', function() {
+document.getElementById('heading').addEventListener('click', function() {
     keywordInput.value = '';
+    countdownTimer.reset(); // 重設倒數計時
     searchYouBike();
 });
 const searchIcon = document.getElementById('searchIcon');
 searchIcon.addEventListener('click', searchYouBike);
-
+let countdownTimer = {
+    remaining: 60,
+    updateButton: document.getElementById('updateCountdown'),
+    updateDisplay: function() {
+        this.updateButton.textContent = currentLang === "en" 
+            ? `${this.remaining} sec update ` 
+            : `${this.remaining}秒後更新`;
+    },
+    reset: function() {
+        this.remaining = 60;
+    }
+};
+countdownTimer.updateDisplay();
+setInterval(() => {
+    countdownTimer.remaining--;
+    if (countdownTimer.remaining <= 0) {
+        searchYouBike();
+        countdownTimer.reset();
+    }
+    countdownTimer.updateDisplay();
+}, 1000);
+countdownTimer.updateButton.addEventListener('click', () => {
+    searchYouBike();
+    countdownTimer.reset();
+    countdownTimer.updateDisplay();
+});
+  document.addEventListener('click', () => {
+      if (extraButtons.classList.contains('show')) {
+          extraButtons.classList.add('hiding');
+          setTimeout(() => {
+              extraButtons.classList.remove('show', 'hiding');
+          }, 500);
+      }
+  });
+    </script>
+    <script defer>
+      // Register Service Worker non-blocking
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker
+            .register("../YouBike/service-worker.js")
+            .then(function (registration) {
+              console.log('Service Worker registered with scope:', registration.scope);
+            })
+            .catch(function (error) {
+              console.error('Service Worker registration failed:', error);
+            });
+        });
+      }
     </script>
   </body>
 </html>
