@@ -5,12 +5,13 @@
     <meta charset="UTF-8" />
     <meta name="author" content="卓稟鈞(AndrewCho)">
     <meta name="description" content="一個專為 YouBike 設計的簡單、美觀且低流量站點搜尋器，提供快速查詢站點資訊功能，滿足即時需求，適合所有用戶使用。">    
-    <meta name="keywords" content="YouBike, youBike, YouBike2.0, youBike2.0, ubike, ibike, obike, kbike, 公共自行車, YouBike站點搜尋, 站點搜尋, YouBike 資訊, 附近站點, 附近YouBike站點, 全台YouBike, 台北YouBike, 新北YouBike, 桃園YouBike, 新竹YouBike, 苗栗YouBike, 臺中YouBike, 嘉義YouBike , 臺南YouBike, 高雄YouBike, 屏東YouBike, 臺東YouBike , YouBike即時資訊, 定位功能, Github, github.io" />
+    <meta name="keywords" content="YouBike, youBike, YouBike2.0, youBike2.0, ubike, ibike, obike, kbike, 微笑單車，公共自行車, 腳踏車，YouBike站點搜尋, 站點搜尋, YouBike 資訊, YouBike據點，ubike據點 ，附近站點, 附近YouBike站點, 全台YouBike, 台北YouBike, 新北YouBike, 桃園YouBike, 新竹YouBike, 苗栗YouBike, 臺中YouBike, 嘉義YouBike , 臺南YouBike, 高雄YouBike, 屏東YouBike, 臺東YouBike , YouBike即時資訊, 定位功能, Github, github.io" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>YouBike 站點搜尋 : 一個簡單、美觀、低流量的YouBike站點搜尋器</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="manifest" href="/YouBike/manifest.json" />
+    <link rel="icon" type="image/x-icon" href="https://potatosserver.github.io/YouBike/icons/icon.ico" />
     <style>
       body {
         font-family: 'Noto Sans TC', Arial, sans-serif;
@@ -124,15 +125,10 @@
         top: 10px;
         right: 10px;
         font-size: 24px;
-        background: none;
-        border: none;
         cursor: pointer;
         color: #007BFF;
         transition: transform 0.2s ease, color 0.2s ease;
-        width: auto;
-        height: auto;
-        border-radius: 0;
-        display: inline;
+        user-select: none;  /* 防止文字被選取 */
       }
       .station .pin-button:hover {
         transform: scale(1.2);
@@ -623,7 +619,7 @@
       const keywordInput = document.getElementById('keyword');
       const maxResults = 100;
       const defaultSearchArea = "";
-      const pinnedStations = new Set(JSON.parse(localStorage.getItem('pinnedStations') || '[]'));
+      const pinnedStations = new Set(JSON.parse(localStorage.getItem('pinnedStations') || '[]').map(id => String(id)));
       const useLocationSetting = localStorage.getItem("useLocation");
       const useLocation = useLocationSetting === null ? true : useLocationSetting === "true";
       document.getElementById('toggleUseLocation').checked = useLocation;
@@ -641,17 +637,33 @@
       });
       function togglePinStation(stationId, event) {
         event.stopPropagation();
-        if (pinnedStations.has(stationId)) {
-          pinnedStations.delete(stationId);
+        
+        // 統一轉換為字串類型
+        const id = String(stationId);
+        
+        // 更新 pinnedStations Set
+        if (pinnedStations.has(id)) {
+          pinnedStations.delete(id);
         } else {
-          pinnedStations.add(stationId);
+          pinnedStations.add(id);
         }
-        localStorage.setItem('pinnedStations', JSON.stringify([...pinnedStations]));
-        const pinButton = document.querySelector(`.pin-button[data-id="${stationId}"]`);
+        
+        // 立即更新 localStorage
+        try {
+          localStorage.setItem('pinnedStations', JSON.stringify([...pinnedStations]));
+        } catch (e) {
+          console.error('Failed to save pinned stations:', e);
+        }
+      
+        // 更新按鈕狀態
+        const pinButton = document.querySelector(`.pin-button[data-id="${id}"]`);
         if (pinButton) {
-          pinButton.classList.toggle('pinned');
-          pinButton.textContent = pinnedStations.has(stationId) ? '★' : '☆';
+          const isPinned = pinnedStations.has(id);
+          pinButton.classList.toggle('pinned', isPinned);
+          pinButton.textContent = isPinned ? '★' : '☆';
         }
+        
+        // 重新排序結果
         updateResultsOrder();
       }
       let mainContentShown = false;
@@ -867,7 +879,14 @@
             const station = item.station_info;
             const vehicle = item.vehicle_info;
             let card = document.querySelector(`.station[data-id="${station.id}"]`);
-            const pinButtonHtml = `<span class="pin-button ${pinnedStations.has(station.id) ? 'pinned' : ''}" data-id="${station.id}" onclick="togglePinStation('${station.id}', event)">${pinnedStations.has(station.id) ? '★' : '☆'}</span>`;
+            
+            // 確保釘選狀態判斷一致
+            const isPinned = pinnedStations.has(String(station.id));
+            const pinButtonHtml = `<span 
+              class="pin-button ${isPinned ? 'pinned' : ''}" 
+              data-id="${station.id}" 
+              onclick="togglePinStation('${station.id}', event)"
+            >${isPinned ? '★' : '☆'}</span>`;
             const distance = calculateDistance(
               userLocation ? userLocation.latitude : defaultLatitude,
               userLocation ? userLocation.longitude : defaultLongitude,
@@ -891,6 +910,7 @@
             const isDefaultLocation = userLocation && userLocation.latitude === defaultLatitude && userLocation.longitude === defaultLongitude;
             const distanceHTML = !isDefaultLocation ? `<p class="distance">${distanceLabel} ${displayDistance}</p>` : "";
             const cardContent = `
+                          ${pinButtonHtml}
                           <h3>${station.name || unknownStation}</h3>
                           ${distanceHTML}
                           <p>${addressLabel} ${station.address || unknownAddress}</p>
