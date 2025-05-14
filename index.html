@@ -929,14 +929,6 @@
               card.dataset.lng = station.coords[1];
               card.style.width = window.innerWidth < 768 ? (window.innerWidth < 480 ? "100%" : "calc(50% - 10px)") : "calc(33% - 14px)";
               card.innerHTML = cardContent;
-              card.addEventListener("click", () => {
-                const lat = parseFloat(station.coords[0]), lng = parseFloat(station.coords[1]);
-                if (!isNaN(lat) && !isNaN(lng)) {
-                  window.open(`https://www.google.com/maps?q=${lat},${lng}`, "_blank");
-                } else {
-                  showModal(currentLang === "en" ? "Invalid station coordinates, cannot open map." : "站點座標無效，無法開啟地圖。");
-                }
-              });
               resultsDiv.appendChild(card);
             }
           });
