@@ -36,7 +36,7 @@
         position: relative;
         /* 調整左右 padding 以為圖示留出空間 */
         padding: 8px 16px; /* 寬螢幕下的左右間距 */
-        box-sizing: border-box;
+        box-sizing: border-box; /* 確保 padding 不會增加總寬度 */
         background-color: white; /* Default background */
         border-radius: 28px; /* 大圓角 */
         box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* subtle elevation */
@@ -108,15 +108,15 @@
         padding: 0; /* 移除 input 自身的 padding */
         /* 調整寬度以考慮到左右兩側的圖示 */
         width: calc(100% - 24px - 10px - 24px - 10px); /* 減去左側搜尋圖示+間距，右側定位圖示+間距 */
-        border: none;
-        border-radius: 0;
-        margin: 0;
+        border: none; /* 移除邊框 */
+        border-radius: 0; /* 圓角由 container 控制 */
+        margin: 0; /* 移除 margin */
         font-size: 16px;
-        box-shadow: none;
+        box-shadow: none; /* 陰影由 container 控制 */
         word-wrap: break-word;
         overflow-wrap: break-word;
         display: block;
-        background-color: transparent;
+        background-color: transparent; /* 透明背景，顯示 container 背景 */
         color: #333; /* Default text color */
         /* 為了讓文字不貼邊，在這裡或在媒體查詢中為 keyword 添加左右 padding */
          padding: 0 5px; /* 給予輸入框內部一些左右間距 */
@@ -668,6 +668,51 @@
       const locationIcon = document.getElementById('locationIcon');
       const toggleUseLocationCheckbox = document.getElementById('toggleUseLocation'); // 獲取隱藏的 checkbox
 
+      // 定義倒數計時器物件
+      let countdownTimer = {
+          remaining: 60,
+          updateButton: null, // 稍後在 showMainContent 中取得按鈕
+          updateDisplay: function() {
+              if (this.updateButton) { // 檢查按鈕是否存在
+                  this.updateButton.textContent = currentLang === "en"
+                      ? `${this.remaining} sec update `
+                      : `${this.remaining}秒後更新`;
+              }
+          },
+          reset: function() {
+              this.remaining = 60;
+              this.updateDisplay(); // 重設時立即更新顯示
+          }
+      };
+
+      let updateIntervalId = null; // 用於儲存 setInterval 的 ID
+
+      // 啟動倒數計時器函數，確保在按鈕顯示後才調用
+      function startUpdateTimer() {
+          if (updateIntervalId === null) { // 只有當計時器未啟動時才啟動
+              countdownTimer.updateButton = document.getElementById('updateCountdown'); // 獲取按鈕元素
+              countdownTimer.updateDisplay(); // 顯示初始倒數秒數
+
+              updateIntervalId = setInterval(() => {
+                  countdownTimer.remaining--;
+                  if (countdownTimer.remaining <= 0) {
+                      // 定時更新邏輯：檢查定位開關狀態
+                       const toggleUseLocationCheckbox = document.getElementById('toggleUseLocation');
+                       if (toggleUseLocationCheckbox && toggleUseLocationCheckbox.checked) {
+                           getLocation(); // 使用定位更新
+                       } else {
+                            userLocation = { latitude: defaultLatitude, longitude: defaultLongitude }; // 確保使用預設座標
+                            searchYouBike(); // 使用預設座標更新
+                       }
+                       updateVehicleData(); // 更新車輛數據
+                       countdownTimer.reset(); // 重設計時器
+                  }
+                  countdownTimer.updateDisplay(); // 每秒更新倒數顯示
+              }, 1000);
+          }
+      }
+
+
       // 頁面載入時，根據 localStorage 中的設置初始化 checkbox 狀態並更新圖示
       document.addEventListener('DOMContentLoaded', () => {
         const useLocationSetting = localStorage.getItem("useLocation");
@@ -678,7 +723,7 @@
         // 根據 checkbox 的初始狀態設置圖示樣式
         if (toggleUseLocationCheckbox.checked) {
           locationIcon.classList.add('active');
-          // 您可以選擇更換圖示，例如顯示為填充的定位圖示
+          // 如果您想切換圖示，可以在這裡設置 textContent
           // locationIcon.textContent = 'location_on';
         } else {
           locationIcon.classList.remove('active');
@@ -686,13 +731,6 @@
           // locationIcon.textContent = 'my_location';
         }
 
-        // 頁面載入後，如果定位是開啟的，則獲取定位；否則使用預設座標搜尋
-        if (toggleUseLocationCheckbox.checked) {
-            getLocation(); // 獲取定位
-        } else {
-            userLocation = { latitude: defaultLatitude, longitude: defaultLongitude };
-            searchYouBike(); // 使用預設座標搜尋
-        }
         // 其他現有的 DOMContentLoaded 邏輯...
       });
 
@@ -765,21 +803,42 @@
             setTimeout(() => {
               overlay.style.display = "none";
               mainContent.style.display = "block";
-              document.getElementById('updateCountdown').style.display = "block";
+              document.getElementById('updateCountdown').style.display = "block"; // 顯示倒數計時按鈕
+              startUpdateTimer(); // 在主內容顯示後啟動計時器
             }, 500);
           } else {
+            // 離線模式...
             const lang = localStorage.getItem("lang") || "zh";
             document.getElementById("loadingText").textContent = lang === "en" ? "Offline mode starting..." : "離線模式啟動中...";
             overlay.style.opacity = "1";
             setTimeout(() => {
               overlay.style.display = "none";
               mainContent.style.display = "block";
-              document.getElementById('updateCountdown').style.display = "block";
+              document.getElementById('updateCountdown').style.display = "block"; // 顯示倒數計時按鈕
+              startUpdateTimer(); // 在主內容顯示後啟動計時器
             }, 3000);
           }
           mainContentShown = true;
-        }
+
+          // 首次載入時，根據定位開關的初始狀態決定是否獲取定位
+          // 這部分邏輯已經移到 DOMContentLoaded 中
+          // 這裡可以確保在 mainContent 顯示後，如果定位開關是開的，會觸發 getLocation
+          const toggleUseLocationCheckbox = document.getElementById('toggleUseLocation');
+          if (toggleUseLocationCheckbox && toggleUseLocationCheckbox.checked && !userLocation) {
+               // 如果定位開關是開的，且 userLocation 還未設定（例如首次載入），則獲取定位
+              getLocation();
+          } else if (!userLocation) {
+               // 如果定位開關是關的，且 userLocation 還未設定，則使用預設座標搜尋
+               userLocation = { latitude: defaultLatitude, longitude: defaultLongitude };
+               searchYouBike();
+          } else {
+               // 如果 userLocation 已經設定（例如從 localStorage 恢復），則根據 userLocation 執行搜尋
+               searchYouBike();
+          }
+
       }
+    }
+
       (function simulateLoadingPercentage() {
         const loadingText = document.getElementById("loadingText");
         let lang = localStorage.getItem("lang") || "zh";
@@ -1205,12 +1264,17 @@
             break;
         }
         showModal(errorMessage);
+        geolocationErrorMessage = errorMessage; // 儲存錯誤訊息以更新 modal 顯示
 
         // 定位失敗，強制關閉定位開關和圖示，並切換到預設座標搜尋
-        toggleUseLocationCheckbox.checked = false;
-        localStorage.setItem("useLocation", "false");
-        locationIcon.classList.remove('active');
-        // locationIcon.textContent = 'my_location';
+        const toggleUseLocationCheckbox = document.getElementById('toggleUseLocation');
+        if (toggleUseLocationCheckbox) {
+             toggleUseLocationCheckbox.checked = false;
+             localStorage.setItem("useLocation", "false");
+             locationIcon.classList.remove('active');
+             // locationIcon.textContent = 'my_location';
+        }
+
 
         userLocation = { latitude: defaultLatitude, longitude: defaultLongitude }; // 切換到預設座標
         searchYouBike(); // 使用預設座標重新搜尋
@@ -1249,8 +1313,9 @@
 
       // 獲取定位的函數
       function getLocation() {
+        const toggleUseLocationCheckbox = document.getElementById('toggleUseLocation');
         // 只有當定位功能開啟時才嘗試獲取定位
-        if (!toggleUseLocationCheckbox.checked) {
+        if (!toggleUseLocationCheckbox || !toggleUseLocationCheckbox.checked) {
              // 如果定位開關是關閉的，直接返回，不執行定位邏輯
              userLocation = { latitude: defaultLatitude, longitude: defaultLongitude }; // 確保 userLocation 是預設座標
              searchYouBike(); // 使用預設座標搜尋
@@ -1291,6 +1356,9 @@
           // 避免在定位被拒絕或出錯時仍然嘗試定時更新
           // 為了簡化，目前保留在這裡，但在定位錯誤時會強制關閉 toggleUseLocationCheckbox
           // 這使得定時器在下次檢查時不會執行定位請求
+          // 這裡的 setInterval 應該在 startUpdateTimer 函數內部，因為更新間隔是由 updateCountdown 按鈕控制的
+          // 移除這裡的 setInterval
+          /*
           setInterval(() => {
             if (toggleUseLocationCheckbox.checked) { // 只有當開關開啟時才進行定時更新
               navigator.geolocation.getCurrentPosition(
@@ -1304,14 +1372,22 @@
               );
             }
           }, 10000); // 每10秒更新一次
+          */
+
         } else {
           // 瀏覽器不支援地理位置
           showModal("您的瀏覽器不支援地理位置功能。站點將以將使用預設座標進行定位。");
+          geolocationErrorMessage = "您的瀏覽器不支援地理位置功能。站點將以將使用預設座標進行定位。"; // 儲存錯誤訊息
+
           // 強制關閉定位開關和圖示
-          toggleUseLocationCheckbox.checked = false;
-          localStorage.setItem("useLocation", "false");
-          locationIcon.classList.remove('active');
-          // locationIcon.textContent = 'my_location';
+          const toggleUseLocationCheckbox = document.getElementById('toggleUseLocation');
+          if (toggleUseLocationCheckbox) {
+              toggleUseLocationCheckbox.checked = false;
+              localStorage.setItem("useLocation", "false");
+              locationIcon.classList.remove('active');
+              // locationIcon.textContent = 'my_location';
+          }
+
 
           userLocation = { latitude: defaultLatitude, longitude: defaultLongitude }; // 切換到預設座標
           searchYouBike(); // 使用預設座標搜尋
@@ -1337,7 +1413,8 @@
 
           if (isDefaultLocation) {
               if (distanceEl) {
-                  distanceEl.remove(); // 如果存在距離元素，則移除它
+                  distanceEl.style.display = 'none'; // 隱藏距離元素
+                  distanceEl.textContent = ""; // 清空文字內容
               }
           } else {
               const distanceLabel = currentLang === "en" ? "Distance:" : "距離:";
@@ -1348,7 +1425,7 @@
                   // 如果距離元素不存在，創建一個並插入到標題下方、地址上方
                   distanceEl = document.createElement('p');
                   distanceEl.classList.add('distance');
-                  const addressEl = card.querySelector('p'); // 找到地址元素
+                  const addressEl = card.querySelector('p:not(.distance)'); // 找到非距離的 p 標籤，假設是地址
                   if (addressEl) {
                       card.insertBefore(distanceEl, addressEl);
                   } else {
@@ -1356,6 +1433,7 @@
                   }
               }
               distanceEl.textContent = distanceLabel + " " + displayDistance + unit;
+              distanceEl.style.display = ''; // 確保距離顯示出來
           }
         });
         updateResultsOrder(); // 距離更新後重新排序
@@ -1377,7 +1455,7 @@
                  if (ybeEl) ybeEl.textContent = unknownValue;
                  if (emptyEl) emptyEl.textContent = unknownValue;
 
-                 // 如果是離線模式，確保顯示車輛信息的 p 標籤仍然存在，只是內容是未知或提示離線
+                 // 確保顯示車輛信息的 p 標籤仍然存在，只是內容是未知或提示離線
                  // 否則下次在線時這些 p 標籤可能需要重新創建
              });
              return;
@@ -1417,7 +1495,7 @@
 
 
               if (yb2El) yb2El.textContent = (data.available_2_0 !== undefined ? data.available_2_0 : unknownValue);
-              if (ybeEl) ybeEl.textContent = (data.available_e !== undefined ? data.available_e : unknownValue);
+              if (ybeEl) yb2El.textContent = (data.available_e !== undefined ? data.available_e : unknownValue);
               if (emptyEl) emptyEl.textContent = (data.empty_spaces !== undefined ? data.empty_spaces : unknownValue);
             });
             // updateResultsOrder(); // 更新車輛數據不影響排序，無需重新排序
@@ -1456,6 +1534,13 @@
       // 更新頁面上所有與語言相關的文字
       function updateLanguageTexts() {
         document.title = currentLang === "en" ? "YouBike Site Search : A simple, beautiful site search engine" : "YouBike 站點搜尋 : 一個簡單、美觀、低流量的YouBike站點搜尋器";
+        // 定位開關文字已移除，無需更新
+        /*
+        const locationSwitchSpan = document.querySelector('#locationSwitchText');
+        if (locationSwitchSpan) {
+          locationSwitchSpan.textContent = currentLang === "en" ? "Use Location" : "使用定位";
+        }
+        */
         const heading = document.getElementById('heading');
         if (heading) {
             heading.textContent = currentLang === "en" ? "YouBike Station Search" : "YouBike 站點搜尋";
@@ -1464,10 +1549,13 @@
         if (keywordInput) {
           keywordInput.placeholder = currentLang === "en" ? "Please enter station name or address" : "請輸入站點名稱、地址";
         }
+        // 倒數計時按鈕文字更新由 countdownTimer 物件負責
+        /*
         const updateCountdownBtn = document.getElementById('updateCountdown');
         if (updateCountdownBtn) {
           updateCountdownBtn.textContent = currentLang === "en" ? `${countdownTimer.remaining} sec update ` : `${countdownTimer.remaining}秒後更新`;
         }
+        */
         const loadingDiv = document.getElementById('loading');
         if (loadingDiv) {
           loadingDiv.textContent = currentLang === "en" ? "Loading, please wait..." : "載入中，請稍候...";
@@ -1555,6 +1643,17 @@
                               slotsLabelSpan.innerHTML = `${slotsLabel} <span class="vehicle_empty">${value}</span>`;
                          }
                     }
+                     // 更新 YouBike 2.0 和 2.0E 標籤
+                     const yb2Span = card.querySelector('.vehicle_yb2')?.parentElement;
+                     if(yb2Span) {
+                          yb2Span.innerHTML = `YouBike 2.0: <span class="vehicle_yb2">${yb2Span.querySelector('.vehicle_yb2').textContent}</span>`;
+                     }
+                     const ybeSpan = card.querySelector('.vehicle_e')?.parentElement;
+                      if(ybeSpan) {
+                          ybeSpan.innerHTML = `YouBike 2.0E: <span class="vehicle_e">${ybeSpan.querySelector('.vehicle_e').textContent}</span>`;
+                      }
+
+
                 } else {
                     // 離線模式下，更新車輛資訊為未知
                     const yb2El = card.querySelector('.vehicle_yb2');
@@ -1564,6 +1663,15 @@
                      if (yb2El) yb2El.textContent = unknownValue;
                      if (ybeEl) ybeEl.textContent = unknownValue;
                      if (emptyEl) emptyEl.textContent = unknownValue;
+
+                     // 確保顯示車輛信息的 p 標籤仍然存在，只是內容是未知或提示離線
+                     // 否則下次在線時這些 p 標籤可能需要重新創建
+                     const yb2P = card.querySelector('p .vehicle_yb2')?.parentElement;
+                     if(yb2P) yb2P.style.display = '';
+                     const ybeP = card.querySelector('p .vehicle_e')?.parentElement;
+                     if(ybeP) ybeP.style.display = '';
+                     const emptyP = card.querySelector('p .vehicle_empty')?.parentElement;
+                     if(emptyP) emptyP.style.display = '';
                 }
             }
         });
@@ -1571,20 +1679,13 @@
          // 更新 modal 的文字
          const modalTextElement = document.getElementById('modalText');
          if (modalTextElement && geolocationErrorMessage) {
-             // 這裡需要根據 geolocationErrorMessage 原始是哪種錯誤，然後根據 currentLang 設置對應的文字
-             // 一種方法是在 handleGeolocationError 中存儲一個包含多語言的錯誤對象
-             // 例如: { code: ..., messages: { en: "...", zh: "..." }}
-             // 然後在這裡根據 currentLang 設置 modalTextElement.textContent = geolocationErrorMessage.messages[currentLang];
-             // 為了簡化，假設 geolocationErrorMessage 已經是正確語言的訊息
              // 如果 modal 正在顯示，重新設置文字以更新顯示
              if (modal.classList.contains('show')) {
-                 // 在 handleGeolocationError 中已經根據語言設置了 geolocationErrorMessage
-                 // 所以這裡只需要重新賦值即可
-                  modalTextElement.textContent = geolocationErrorMessage;
+                  modalTextElement.textContent = geolocationErrorMessage; // geolocationErrorMessage 在 handleGeolocationError 中已經根據語言設置
              }
          }
       }
-      updateLanguageTexts();
+      updateLanguageTexts(); // 首次載入時更新語言文字
 
       // 語言切換按鈕事件
       const langToggle = document.getElementById('langToggle');
@@ -1670,8 +1771,10 @@
 
       modalButton.addEventListener('click', hideModal);
 
-
-      // 頁面載入時的初始化邏輯已移至 DOMContentLoaded 事件監聽器中
+      // 頁面載入完成時顯示主內容並啟動計時器
+      window.addEventListener('load', () => {
+          showMainContent(); // 顯示主內容並在內部啟動計時器和執行首次搜尋/定位
+      });
 
 
       keywordInput.addEventListener('keypress', function (event) {
@@ -1684,45 +1787,19 @@
       const searchIcon = document.getElementById('searchIcon');
       searchIcon.addEventListener('click', searchYouBike);
 
-      let countdownTimer = {
-          remaining: 60,
-          updateButton: document.getElementById('updateCountdown'),
-          updateDisplay: function() {
-              this.updateButton.textContent = currentLang === "en"
-                  ? `${this.remaining} sec update `
-                  : `${this.remaining}秒後更新`;
-          },
-          reset: function() {
-              this.remaining = 60;
-          }
-      };
-      countdownTimer.updateDisplay();
-      setInterval(() => {
-          countdownTimer.remaining--;
-          if (countdownTimer.remaining <= 0) {
-              // 在定時更新時，如果定位開關是開啟的，則使用定位；否則使用預設座標
-              if (toggleUseLocationCheckbox.checked) {
-                  getLocation(); // 觸發定位更新
-              } else {
-                   userLocation = { latitude: defaultLatitude, longitude: defaultLongitude }; // 確保使用預設座標
-                   searchYouBike(); // 使用預設座標重新搜尋
-              }
-              updateVehicleData(); // 定時更新車輛數據
-              countdownTimer.reset();
-          }
-          countdownTimer.updateDisplay();
-      }, 1000);
-      countdownTimer.updateButton.addEventListener('click', () => {
-          // 手動觸發更新時，如果定位開關是開啟的，則使用定位；否則使用預設座標
-           if (toggleUseLocationCheckbox.checked) {
-              getLocation(); // 觸發定位更新
+
+      // 處理手動點擊更新按鈕事件
+      document.getElementById('updateCountdown').addEventListener('click', () => {
+          // 手動觸發更新時，檢查定位開關狀態
+           const toggleUseLocationCheckbox = document.getElementById('toggleUseLocation');
+           if (toggleUseLocationCheckbox && toggleUseLocationCheckbox.checked) {
+              getLocation(); // 使用定位更新
           } else {
                userLocation = { latitude: defaultLatitude, longitude: defaultLongitude }; // 確保使用預設座標
-               searchYouBike(); // 使用預設座標重新搜尋
+               searchYouBike(); // 使用預設座標更新
           }
           updateVehicleData(); // 手動更新車輛數據
-          countdownTimer.reset();
-          countdownTimer.updateDisplay();
+          countdownTimer.reset(); // 重設計時器
       });
 
     </script>
