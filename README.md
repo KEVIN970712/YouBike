@@ -46,10 +46,9 @@
 
 ## 備註
 
-1. PWA(Progressive Web App)是指一種網頁應用程式的設計理念，旨在提供類似原生應用程式的使用體驗。PWA可以在各種設備上運行，包括桌面和移動設備，並且可以離線使用。PWA的特點包括快速加載、可靠性和可安裝性。PWA的目標是讓網頁應用程式像原生應用程式一樣流暢和易於使用。
-2. 建議使用Chrome、Microsoft Edge 等瀏覽器，其他瀏覽器對於PWA的支援較差，可能會導致安裝失敗或無法正常運行。
-3. 目前新版本支援全國的YouBike站點資訊，但在未開啟定位的情況下會以高雄捷運美麗島站為中心定位。
-4. GitHub 按鈕提供兩個程式語言編寫的YouBike搜尋器
+1. 建議使用Chrome、Microsoft Edge 等瀏覽器，其他瀏覽器對於PWA的支援較差，可能會導致安裝失敗或無法正常運行。
+2. 目前新版本支援全國的YouBike站點資訊，但在未開啟定位的情況下會以高雄捷運美麗島站為中心定位。
+3. GitHub 按鈕提供兩個程式語言編寫的YouBike搜尋器
 
 ## 資料來源
 
@@ -69,8 +68,8 @@
 
 ## 貢獻者
 
-* [AndrewCho0531](https://github.com/AndrewCho0531):邏輯編寫、UI設計
-* [KEVIN970712](https://github.com/KEVIN970712):題材發想、錯誤修正、APK封裝
+* [AndrewCho0531](https://github.com/AndrewCho0531)
+* [KEVIN970712](https://github.com/KEVIN970712)
 
 ## 補充
 
