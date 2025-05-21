@@ -471,9 +471,6 @@
         height: 45px;
         object-fit: contain;
       }
-      /* 移除 installButton 樣式 */
-      /* #installButton { ... } */
-      /* #installButton img { ... } */
 
       #extraButtons {
           position: fixed;
@@ -955,13 +952,13 @@
                                                  : distance.toFixed(2) + (currentLang === "en" ? " km" : " 公里");
             const distanceLabel = currentLang === "en" ? "Distance:" : "距離:";
             const addressLabel = currentLang === "en" ? "Address:" : "地址:";
-            const slotsLabel = currentLang === "en" ? "Available Slots:" : "可停空位數:";
+            const slotsLabel = currentLang === "en" ? "Available Slots:" : "可停空位數：";
             const unknownStation = currentLang === "en" ? "Unknown Station" : "未知站點";
             const unknownAddress = currentLang === "en" ? "Unknown Address" : "未知地址";
             const unknownValue = currentLang === "en" ? "Unknown" : "未知";
             const vehicleInfoHtml = isOnline ? `
-                          <p>YouBike 2.0: <span class="vehicle_yb2">${vehicle?.available_2_0 !== undefined ? vehicle.available_2_0 : unknownValue}</span></p>
-                          <p>YouBike 2.0E: <span class="vehicle_ybe">${vehicle?.available_e !== undefined ? vehicle.available_e : unknownValue}</span></p>
+                          <p>YouBike 2.0： <span class="vehicle_yb2">${vehicle?.available_2_0 !== undefined ? vehicle.available_2_0 : unknownValue}</span></p>
+                          <p>YouBike 2.0E： <span class="vehicle_ybe">${vehicle?.available_e !== undefined ? vehicle.available_e : unknownValue}</span></p>
                           <p>${slotsLabel} <span class="vehicle_empty">${vehicle?.empty_spaces !== undefined ? vehicle.empty_spaces : unknownValue}</span></p>
                         ` : '';
             // 當使用預設座標時不顯示距離
@@ -987,15 +984,6 @@
               card.dataset.lng = station.coords[1];
               card.style.width = window.innerWidth < 768 ? (window.innerWidth < 480 ? "100%" : "calc(50% - 10px)") : "calc(33% - 14px)";
               card.innerHTML = cardContent;
-              // 移除點擊站點卡片跳轉 Google Maps 的事件監聽器
-              // card.addEventListener("click", () => {
-              //   const lat = parseFloat(station.coords[0]), lng = parseFloat(station.coords[1]);
-              //   if (!isNaN(lat) && !isNaN(lng)) {
-              //     window.open(`https://www.google.com/maps?q=${lat},${lng}`, "_blank");
-              //   } else {
-              //     showModal(currentLang === "en" ? "Invalid station coordinates, cannot open map." : "站點座標無效，無法開啟地圖。");
-              //   }
-              // });
               resultsDiv.appendChild(card);
             }
           });
@@ -1361,54 +1349,6 @@
           searchYouBike();
         }
       });
-
-      // 移除 installButton 相關 JavaScript
-      /*
-      function updateInstallButton() {
-          const installBtn = document.getElementById('installButton');
-          if (deferredPrompt) {
-              installBtn.innerHTML = '<img src="https://kevin970712.github.io/YouBike/icons/install.webp" alt="安裝" style="width:45px; height:45px;" />';
-              installBtn.title = "安裝應用程式";
-              installBtn.style.display = 'block';
-          } else {
-              installBtn.style.display = 'none';
-          }
-      }
-      let deferredPrompt;
-      document.addEventListener('DOMContentLoaded', () => {
-          updateInstallButton();
-          window.addEventListener('beforeinstallprompt', (e) => {
-              e.preventDefault();
-              deferredPrompt = e;
-              document.getElementById('installButton').style.display = 'block';
-              updateInstallButton();
-          });
-          document.getElementById('installButton').addEventListener('click', async () => {
-              try {
-                  if (deferredPrompt) {
-                      await deferredPrompt.prompt();
-                      const { outcome } = await deferredPrompt.userChoice;
-                      console.log('User response to the install prompt:', outcome);
-                      deferredPrompt = null;
-                  } else if (window.matchMedia('(display-mode: standalone)').matches) {
-                      alert("App 已在運行中。");
-                  } else {
-                      const errorMessage = 'App 已安裝，請從主畫面或開始清單中打開應用程式。';
-                      console.error('PWA button error:', errorMessage, { deferredPrompt, displayMode: window.matchMedia('(display-mode: standalone)').matches, userAgent: navigator.userAgent, manifestHref: document.querySelector('link[rel="manifest"]')?.href });
-                      alert(errorMessage);
-                  }
-                  updateInstallButton();
-              } catch (error) {
-                  console.error('安裝按鈕發生錯誤:', error);
-              }
-          });
-      });
-      window.addEventListener('appinstalled', () => {
-          console.log('App 已安裝');
-          deferredPrompt = null;
-          updateInstallButton();
-      });
-      */
 
     const extraButtons = document.getElementById('extraButtons');
     const githubButton = document.getElementById('githubButton');
