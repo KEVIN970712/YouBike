@@ -610,8 +610,7 @@
     <div id="loadingOverlay">
       <div id="loadingContent">
         <h2 id="loadingText">載入中</h2>
-        <div id="noticeBox" style="margin-top: 10px; margin-left: 20px; margin-right: 20px; background: #fff; padding: 10px; border: 1px solid #ccc; border-radius: 5px;"></div>
-      </div>
+        </div>
     </div>
     <div id="mainContent" style="display:none;">
       <h1 id="heading"></h1>
@@ -767,30 +766,6 @@
             clearInterval(loadingTextInterval);
           }
         }, 50);
-      })();
-      (function showRandomNotice(){
-        let lang = localStorage.getItem("lang") || "zh";
-        const notices = lang === "en" ? [
-              "❌Do not speed or ride in reverse",
-              "❌Do not change lanes arbitrarily on sidewalks",
-              "❌Do not use your phone while riding",
-              "❌Avoid harsh braking while riding",
-              "✔️Remember to adjust the seat to a proper height",
-              "✔️Ensure that both front and rear lights are working",
-              "✔️Remember to get bicycle accident insurance",
-              "✔️Take your belongings from the basket"
-        ] : [
-              "❌勿超速或逆向騎乘",
-              "❌勿隨意變換車道在行人道上騎乘",
-              "❌勿在車輛行駛中使用手機",
-              "❌騎乘中勿緊急煞車",
-              "✔️記得調整座墊至適宜高度",
-              "✔️確認前後車燈功能正常",
-              "✔️記得投保公共自行車傷害險",
-              "✔️記得帶走置物籃內的隨身物品"
-        ];
-        const randomIndex = Math.floor(Math.random() * notices.length);
-        document.getElementById('noticeBox').textContent = notices[randomIndex];
       })();
 
       let youbikeDataCache = null;
@@ -1301,7 +1276,7 @@
         currentLang = currentLang === "en" ? "zh" : "en";
         localStorage.setItem("lang", currentLang);
         updateLanguageTexts();
-        // 直接呼叫 searchYouBike 更新站點卡片文字，不顯示 loading 效果
+        // 直接呼叫 searchYouBike 更新站點卡片文字，不顯示 loading 效果 
         searchYouBike(false);
       });
 
