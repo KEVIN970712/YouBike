@@ -100,7 +100,7 @@
       /* 定位圖示樣式 */
       #locationIcon {
           margin-left: 15px; /* 與搜尋圖示的間距 */
-          font-size: 24px; /* 圖示大小 */
+          font-size: 20px; /* 調整圖示大小，從 24px 縮小到 20px */
           cursor: pointer;
           color: #555; /* 預設圖示顏色 */
           transition: color 0.3s ease;
@@ -442,8 +442,8 @@
              align-items: center;
              justify-content: center;
          }
-        /* 定位開關容器在窄螢幕下的樣式 */
-        #locationSwitchContainer {
+        /* 定位圖示在窄螢幕下的樣式 */
+        #locationIcon {
             margin-left: 10px; /* 調整間距 */
             padding-right: 0; /* 移除右側內邊距 */
         }
@@ -501,7 +501,6 @@
         color: #007BFF;
         text-align: center;
       }
-      /* 移除 .switch, .slider 相關樣式 */
     </style>
   </head>
   <body>
@@ -560,7 +559,7 @@
       const maxResults = 100;
       const defaultSearchArea = "";
       const pinnedStations = new Set(JSON.parse(localStorage.getItem('pinnedStations') || '[]').map(id => String(id)));
-      // 直接從 localStorage 讀取 useLocation 狀態，不再使用開關的 checked 屬性
+      // 直接從 localStorage 讀取 useLocation 狀態
       let useLocation = localStorage.getItem("useLocation") === "true"; 
       
       // 獲取定位圖示元素
