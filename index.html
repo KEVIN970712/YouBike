@@ -34,7 +34,7 @@
         max-width: 500px;
         width: 100%;
         position: relative;
-        padding: 8px 16px; /* 調整內部間距 */
+        padding: 8px 16px; /* 調整內部間距，左右16px */
         box-sizing: border-box; /* 確保 padding 不會增加總寬度 */
         background-color: white; /* Default background */
         border-radius: 28px; /* 大圓角 */
@@ -49,7 +49,7 @@
 
       /* Material 3 風格的搜尋輸入框 */
       #keyword {
-        padding: 0; /* 移除 input 自身的 padding，由 container 控制 */
+        padding: 0 0 0 12px; /* 調整 padding-left 確保文字不會被遮蓋 */
         flex-grow: 1; /* 讓輸入框佔據可用空間 */
         border: none; /* 移除邊框 */
         border-radius: 0; /* 圓角由 container 控制 */
@@ -99,7 +99,7 @@
 
       /* 定位圖示樣式 */
       #locationIcon {
-          margin-left: 15px; /* 與搜尋圖示的間距 */
+          margin-left: 10px; /* 與搜尋圖示的間距，調整為與 searchIcon 相同 */
           font-size: 20px; /* 調整圖示大小，從 24px 縮小到 20px */
           cursor: pointer;
           color: #555; /* 預設圖示顏色 */
@@ -320,9 +320,6 @@
       body.dark-mode #loadingOverlay {
         background-color: rgba(51, 51, 51, 0.9);
       }
-      body.dark-mode #loadingText {
-        color: #ffffff;
-      }
       body.dark-mode #noticeBox {
         background-color: #000;
         color: #000;
@@ -419,7 +416,7 @@
         }
         /* Adjusted search container for horizontal layout */
         #searchContainer {
-            padding: 8px 12px; /* Adjust padding */
+            padding: 8px 16px; /* 調整 padding，左右16px */
         }
         #keyword {
           /* Adjusted width to leave space for the icon and toggle */
@@ -428,7 +425,7 @@
           margin-bottom: 0; /* No margin-bottom in row layout */
           border-radius: 28px; /* Keep rounded corners like default */
           display: block;
-          padding: 0 12px; /* Padding controlled by container */
+          padding: 0 0 0 12px; /* 調整 padding-left 確保文字不會被遮蓋 */
         }
          #searchIcon {
              position: static; /* Remain in static flow within flex container */
@@ -466,12 +463,12 @@
           width: 100%;
         }
         #searchContainer {
-             padding: 10px; /* 更小的螢幕間距 */
+             padding: 10px 16px; /* 更小的螢幕間距，左右保持16px */
          }
          #keyword {
              /* Adjusted width for smaller screens if needed, keeping room for icon and toggle */
              flex-grow: 1; /* Allow keyword to grow */
-             padding: 0 10px; /* Padding controlled by container */
+             padding: 0 0 0 12px; /* 調整 padding-left 確保文字不會被遮蓋 */
          }
           #searchIcon {
              /* Icon styles remain consistent with 768px breakpoint */
