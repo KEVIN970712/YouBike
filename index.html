@@ -308,36 +308,90 @@
         color: #000;
         border: 1px solid #444;
       }
-      #toggleDarkMode {
+      
+      /* Styles for the combined floating menu options */
+      #floatingMenuOptions {
+          position: fixed;
+          bottom: 120px; /* Position above the main toggle button */
+          right: 20px;
+          display: flex;
+          flex-direction: column; /* Vertical alignment */
+          gap: 10px; /* Space between buttons */
+          z-index: 1000;
+          opacity: 0; /* Hidden by default */
+          visibility: hidden; /* Hidden by default */
+          transition: opacity 0.3s ease, visibility 0.3s ease; /* Smooth fade in/out */
+      }
+      #floatingMenuOptions.show {
+          opacity: 1;
+          visibility: visible;
+      }
+      #floatingMenuOptions a,
+      #floatingMenuOptions button {
+          width: 50px;
+          height: 50px;
+          background-color: white;
+          color: black;
+          border: none;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+          text-decoration: none;
+          transition: background-color 0.3s ease, transform 0.2s ease;
+      }
+      #floatingMenuOptions a:hover,
+      #floatingMenuOptions button:hover {
+          background-color: #f0f0f0;
+          transform: scale(1.1);
+      }
+
+      /* Specific styles for dark mode toggle and language toggle within the combined menu */
+      #darkModeToggle, #langToggle {
+          background: linear-gradient(135deg, #007BFF, #0056b3);
+          color: white;
+          font-size: 24px;
+      }
+      #darkModeToggle:hover, #langToggle:hover {
+          background: linear-gradient(135deg, #0056b3, #003f7f);
+      }
+      body.dark-mode #darkModeToggle, body.dark-mode #langToggle {
+        background: linear-gradient(135deg, #90caf9, #64b5f6);
+        color: #121212;
+      }
+      body.dark-mode #darkModeToggle:hover, body.dark-mode #langToggle:hover {
+        background: linear-gradient(135deg, #64b5f6, #42a5f5);
+      }
+
+      /* Main toggle button (gear icon) */
+      #mainToggleButton {
         position: fixed;
-        bottom: 20px;
+        bottom: 60px; /* Position above update countdown */
         right: 20px;
-        z-index: 1000;
+        z-index: 1200; /* Ensure it's on top */
         width: 50px;
         height: 50px;
-        background: linear-gradient(135deg, #007BFF, #0056b3);
-        color: white;
+        background: white;
+        color: black;
         border: none;
         border-radius: 50%;
         cursor: pointer;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 24px;
-        transition: background 0.3s ease, transform 0.2s ease;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        transition: transform 0.2s ease;
       }
-      #toggleDarkMode:hover {
-        background: linear-gradient(135deg, #0056b3, #003f7f);
+      #mainToggleButton:hover {
         transform: scale(1.1);
       }
-      body.dark-mode #toggleDarkMode {
-        background: linear-gradient(135deg, #90caf9, #64b5f6);
-        color: #121212;
+
+      #updateCountdown {
+          white-space: nowrap;
       }
-      body.dark-mode #toggleDarkMode:hover {
-        background: linear-gradient(135deg, #64b5f6, #42a5f5);
-      }
+
       /* 針對窄螢幕的調整 */
       @media (max-width: 768px) {
         .station {
@@ -345,12 +399,9 @@
         }
         /* Adjusted search container for horizontal layout */
         #searchContainer {
-            /* Removed flex-direction: column; to keep items in a row */
             padding: 8px 12px; /* Adjust padding */
-            /* Ensure display: flex and align-items: center; are effective */
         }
         #keyword {
-          /* Adjusted width to leave space for the icon */
           width: calc(100% - 34px); /* Assuming 24px icon + 10px margin */
           margin-right: 0;
           margin-bottom: 0; /* No margin-bottom in row layout */
@@ -363,7 +414,6 @@
              margin-left: 10px; /* Space between input and icon */
              margin-top: 0; /* No margin-top in row layout */
              align-self: auto; /* Default alignment in flex row */
-             /* Ensure font-size, width, height are set for the icon */
              font-size: 24px; /* Material Icons size */
              width: 24px;
              height: 24px;
@@ -393,7 +443,6 @@
              padding: 10px; /* 更小的螢幕間距 */
          }
          #keyword {
-             /* Adjusted width for smaller screens if needed, keeping room for icon */
              width: calc(100% - 34px); /* Assuming 24px icon + 10px margin */
              padding: 0 10px; /* Padding controlled by container */
          }
@@ -464,146 +513,6 @@
       input:checked + .slider:before {
         transform: translateX(26px);
       }
-      #githubButton img {
-        display: block;
-        margin: 0;
-        width: 45px;
-        height: 45px;
-        object-fit: contain;
-      }
-
-      #extraButtons {
-          position: fixed;
-          bottom: 120px;
-          right: 80px;
-          transform: translateX(100%);
-          transition: transform 0.5s ease;
-          display: flex;
-          flex-direction: row; /* 改為水平排列 */
-          gap: 10px;
-          z-index: 1000;
-      }
-      #extraButtons.show {
-          transform: translateX(0);
-      }
-      #extraButtons a {
-          width: 50px;
-          height: 50px;
-          background-color: white;
-          color: black;
-          border: none;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-          text-decoration: none;
-          transition: background-color 0.3s ease;
-      }
-      #extraButtons a:hover {
-          background-color: #f0f0f0;
-      }
-      @keyframes popUp {
-          0% { transform: translateX(100%) scale(0.5); opacity: 0; }
-          100% { transform: translateX(0) scale(1); opacity: 1; }
-      }
-      @keyframes popDown {
-          0% { transform: translateX(0) scale(1); opacity: 1; }
-          100% { transform: translateX(100%) scale(0.5); opacity: 0; }
-      }
-      #extraButtons {
-          position: fixed;
-          bottom: 120px;
-          right: 80px;
-          transform: translateX(100%) scale(0.5);
-          opacity: 0;
-          transition: transform 0.5s ease, opacity 0.5s ease;
-          display: flex;
-          flex-direction: row;
-          gap: 10px;
-          z-index: 1000;
-      }
-      #extraButtons.show {
-          transform: translateX(0) scale(1);
-          opacity: 1;
-          animation: popUp 0.5s forwards;
-      }
-      #extraButtons.hiding {
-          animation: popDown 0.5s forwards;
-      }
-      #extraButtons a {
-          width: 50px;
-          height: 50px;
-          background-color: white;
-          color: black;
-          border: none;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-          text-decoration: none;
-          transition: background-color 0.3s ease;
-      }
-      #extraButtons a:hover {
-          background-color: #f0f0f0;
-      }
-      #extraButtons.hiding {
-          animation: popDown 0.5s forwards;
-      }
-      #settingsPanel {
-          position: fixed;
-          bottom: 60px;
-          right: 80px; /* 調整至適合位置 */
-          display: flex;
-          flex-direction: row;
-          gap: 10px;
-          z-index: 1000;
-          transform: translateX(100%) scale(0.5);
-          opacity: 0;
-          transition: transform 0.5s ease, opacity 0.5s ease;
-      }
-      #settingsPanel.show {
-          transform: translateX(0) scale(1);
-          opacity: 1;
-          animation: popUpSettings 0.5s forwards;
-      }
-      #darkModeToggle {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 50px;
-          height: 50px;
-          background: linear-gradient(135deg, #007BFF, #0056b3);
-          border: none;
-          color: white;
-          border-radius: 50%;
-          cursor: pointer;
-          font-size: 24px;
-          transition: background 0.3s ease, transform 0.2s ease;
-      }
-      #darkModeToggle:hover, #langToggle:hover {
-          background-color: #f0f0f0;
-          transform: scale(1.1);
-      }
-      /* 新增針對 settingsPanel 的動畫 */
-      @keyframes popUpSettings {
-          0% { transform: translateX(150%) scale(0.5); opacity: 0; }
-          100% { transform: translateX(0) scale(1); opacity: 1; }
-      }
-      /* 新增 settingsPanel 收合動畫 */
-      @keyframes popDownSettings {
-          0% { transform: translateX(0) scale(1); opacity: 1; }
-          100% { transform: translateX(150%) scale(0.5); opacity: 0; }
-      }
-
-      #settingsPanel.hiding {
-          animation: popDownSettings 0.5s forwards;
-      }
-      #updateCountdown {
-          white-space: nowrap;
-      }
-
     </style>
   </head>
   <body>
@@ -632,27 +541,21 @@
         <p id="modalText"></p>
         <button id="modalButton">確定</button>
       </div>
-      <div id="extraButtons">
-          <a href="https://github.com/potatosserver/YouBike" target="_blank">
+      
+      <div id="floatingMenuOptions">
+          <a href="https://github.com/potatosserver/YouBike" target="_blank" title="YouBike Repo">
               <img loading="lazy" src="https://potatosserver.github.io/YouBike/icons/html.webp" alt="YouBike Repo" style="width:30px; height:30px;" />
           </a>
-          <a href="https://github.com/potatosserver/YouBike_Python" target="_blank">
+          <a href="https://github.com/potatosserver/YouBike_Python" target="_blank" title="YouBike Python">
                 <img loading="lazy" src="https://potatosserver.github.io/YouBike/icons/python.webp" alt="YouBike Python" style="width:30px; height:30px;" />
           </a>
+          <button id="darkModeToggle" title="切換暗色模式">🌙</button>
+          <button id="langToggle" title="Switch Language">
+            <img loading="lazy" src="https://potatosserver.github.io/YouBike/icons/translate.webp" alt="Translate" style="width:35px; height:35px;" />
+          </button>
       </div>
-      </div>
-      <a id="githubLink" title="GitHub Repository" href="https://github.com/KEVIN970712/YouBike" target="_blank">
-        <button id="githubButton" style="position: fixed; bottom: 120px; right: 20px; z-index: 1000; width: 50px; height: 50px; background: white; color: black; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;">
-          <img loading="lazy" src="https://potatosserver.github.io/YouBike/icons/github.webp" alt="GitHub" style="width:35px; height:35px;" />
-        </button>
-      </a>
-      <button id="settingsButton" title="設定" style="position: fixed; bottom: 60px; right: 20px; z-index: 1200; width: 50px; height: 50px; background: white; color: black; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 24px; transition: transform 0.2s ease;">⚙️</button>
-      <div id="settingsPanel">
-        <button id="darkModeToggle" title="切換暗色模式">🌙</button>
-        <button id="langToggle" title="Switch Language" style="width:50px; height:50px; border-radius:50%; margin-left:5px; display:flex; align-items:center; justify-content:center;">
-          <img loading="lazy" src="https://potatosserver.github.io/YouBike/icons/translate.webp" alt="Translate" style="width:35px; height:35px;" />
-        </button>
-      </div>
+
+      <button id="mainToggleButton" title="設定" style="position: fixed; bottom: 60px; right: 20px; z-index: 1200; width: 50px; height: 50px; background: white; color: black; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); transition: transform 0.2s ease;">⚙️</button>
     </div>
     <button id="updateCountdown" style="display:none; position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); z-index: 1000; padding: 6px 12px; background-color: white; color: #007bff; border: 2px solid #007bff; border-radius: 25px; font-size: 0.8em; box-shadow: 0 2px 6px rgba(0,0,0,0.2); transition: all 0.3s ease; width: 100px;">60秒後更新</button>
     <script>
@@ -1228,6 +1131,7 @@
             console.error("Vehicle data update failed:", error);
           });
       }
+      // Dark mode toggle logic (now within floatingMenuOptions)
       const darkModeToggle = document.getElementById('darkModeToggle');
       darkModeToggle.addEventListener('click', () => {
         document.body.classList.toggle('dark-mode');
@@ -1280,36 +1184,28 @@
         searchYouBike(false);
       });
 
-      const settingsButton = document.getElementById('settingsButton');
-      const settingsPanel = document.getElementById('settingsPanel');
-      settingsButton.addEventListener('click', (event) => {
-        event.stopPropagation();
-        if (extraButtons.classList.contains('show')) {
-            extraButtons.classList.add('hiding');
-            setTimeout(() => {
-                extraButtons.classList.remove('show', 'hiding');
-            }, 500);
-        }
-        if (settingsPanel.classList.contains('show')) {
-          settingsPanel.classList.add('hiding');
-          setTimeout(() => {
-            settingsPanel.classList.remove('show', 'hiding');
-          }, 500);
-        } else {
-          settingsPanel.classList.add('show');
-        }
+      const mainToggleButton = document.getElementById('mainToggleButton');
+      const floatingMenuOptions = document.getElementById('floatingMenuOptions');
+
+      mainToggleButton.addEventListener('click', (event) => {
+        event.stopPropagation(); // Prevent document click from immediately closing
+        floatingMenuOptions.classList.toggle('show');
       });
-      document.addEventListener('click', () => {
-        if (settingsPanel.classList.contains('show')) {
-          settingsPanel.classList.add('hiding');
-          setTimeout(() => {
-            settingsPanel.classList.remove('show', 'hiding');
-          }, 500);
-        }
+
+      // Close panels when clicking anywhere else on the document
+      document.addEventListener('click', (event) => {
+          // Check if the click target is outside the mainToggleButton and floatingMenuOptions
+          if (!mainToggleButton.contains(event.target) && 
+              !floatingMenuOptions.contains(event.target)) {
+              floatingMenuOptions.classList.remove('show');
+          }
       });
-      settingsPanel.addEventListener('click', (event) => {
+
+      // Prevent clicks inside the panels from closing them
+      floatingMenuOptions.addEventListener('click', (event) => {
         event.stopPropagation();
       });
+
       modalButton.addEventListener('click', hideModal);
       window.addEventListener('load', () => {
         if (useLocation) {
@@ -1325,47 +1221,10 @@
         }
       });
 
-    const extraButtons = document.getElementById('extraButtons');
-    const githubButton = document.getElementById('githubButton');
-    githubButton.addEventListener('click', (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        if (settingsPanel.classList.contains('show')) {
-            settingsPanel.classList.add('hiding');
-            setTimeout(() => {
-                settingsPanel.classList.remove('show', 'hiding');
-            }, 500);
-        }
-        if (extraButtons.classList.contains('show')) {
-            extraButtons.classList.add('hiding');
-            setTimeout(() => {
-                extraButtons.classList.remove('show', 'hiding');
-            }, 500);
-        } else {
-            extraButtons.classList.add('show');
-        }
-      });
-    document.addEventListener('click', () => {
-        if(extraButtons.classList.contains('show')){
-            extraButtons.classList.remove('show');
-        }
-    });
     window.addEventListener('scroll', () => {
-        if (extraButtons.classList.contains('show')) {
-            extraButtons.classList.add('hiding');
-            setTimeout(() => {
-                extraButtons.classList.remove('show', 'hiding');
-            }, 500);
-        }
-        if (settingsPanel.classList.contains('show')) {
-            settingsPanel.classList.add('hiding');
-            setTimeout(() => {
-                settingsPanel.classList.remove('show', 'hiding');
-            }, 500);
-        }
+        // Close panels on scroll
+        floatingMenuOptions.classList.remove('show');
     });
-// 將這個 DOMContentLoaded 事件監聽器結束的括號移動到正確的位置
-// });
 
 document.getElementById('heading').addEventListener('click', function() {
     keywordInput.value = '';
@@ -1400,14 +1259,6 @@ countdownTimer.updateButton.addEventListener('click', () => {
     countdownTimer.reset();
     countdownTimer.updateDisplay();
 });
-  document.addEventListener('click', () => {
-      if (extraButtons.classList.contains('show')) {
-          extraButtons.classList.add('hiding');
-          setTimeout(() => {
-              extraButtons.classList.remove('show', 'hiding');
-          }, 500);
-      }
-  });
     </script>
     <script defer>
       // Register Service Worker non-blocking
