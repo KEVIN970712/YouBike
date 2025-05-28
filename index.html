@@ -132,12 +132,6 @@
         text-align: center;
         display: block;
       }
-      /* 針對特定按鈕調整樣式 */
-      /* 由於定位開關已移入搜尋欄，此規則不再需要 */
-      /* #searchContainer + #locationSwitchContainer {
-           margin-top: 10px;
-      } */
-
 
       button:hover {
         background-color: #0056b3;
@@ -161,7 +155,6 @@
         transition: transform 0.2s ease, box-shadow 0.2s ease;
         word-wrap: break-word;
         overflow-wrap: break-word;
-        /* 移除 cursor: pointer; 因為點擊地圖功能已移除 */
         position: relative;
       }
       .station:hover {
@@ -319,6 +312,11 @@
       }
       body.dark-mode #loadingOverlay {
         background-color: rgba(51, 51, 51, 0.9);
+      }
+      body.dark-mode #loadingText {
+        /* 修正載入文字在暗色模式下的顏色 */
+        color: #90CAF9; 
+        background: none; /* 移除不必要的背景設定 */
       }
       body.dark-mode #noticeBox {
         background-color: #000;
