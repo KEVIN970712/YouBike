@@ -38,19 +38,19 @@
         box-sizing: border-box; /* 確保 padding 不會增加總寬度 */
         background-color: white; /* Default background */
         border-radius: 28px; /* 大圓角 */
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* subtle elevation */
+        /* 移除陰影效果 */
         transition: box-shadow 0.3s ease;
       }
 
       body.dark-mode #searchContainer {
           background-color: #1e1e1e; /* Dark mode background */
-          box-shadow: 0 2px 4px rgba(255,255,255,0.1); /* Dark mode subtle elevation */
+          /* 移除暗色模式下的陰影效果 */
       }
 
       /* Material 3 風格的搜尋輸入框 */
       #keyword {
         padding: 0; /* 移除 input 自身的 padding，由 container 控制 */
-        width: calc(100% - 34px); /* 調整寬度為 container 寬度減去 icon 空間和間距 */
+        flex-grow: 1; /* 讓輸入框佔據可用空間 */
         border: none; /* 移除邊框 */
         border-radius: 0; /* 圓角由 container 控制 */
         margin: 0; /* 移除 margin */
@@ -97,6 +97,25 @@
         color: #007BFF; /* Hover color */
       }
 
+      /* 定位圖示樣式 */
+      #locationIcon {
+          margin-left: 15px; /* 與搜尋圖示的間距 */
+          font-size: 24px; /* 圖示大小 */
+          cursor: pointer;
+          color: #555; /* 預設圖示顏色 */
+          transition: color 0.3s ease;
+          flex-shrink: 0; /* 防止縮小 */
+      }
+      body.dark-mode #locationIcon {
+          color: #ccc; /* 暗色模式圖示顏色 */
+      }
+      #locationIcon.active {
+          color: #007BFF; /* 啟用時的顏色 */
+      }
+      body.dark-mode #locationIcon.active {
+          color: #90CAF9; /* 暗色模式啟用時的顏色 */
+      }
+
       button {
         padding: 10px 20px;
         background-color: #007BFF;
@@ -114,9 +133,10 @@
         display: block;
       }
       /* 針對特定按鈕調整樣式 */
-      #searchContainer + #locationSwitchContainer {
-           margin-top: 10px; /* 調整搜尋欄下方間距 */
-      }
+      /* 由於定位開關已移入搜尋欄，此規則不再需要 */
+      /* #searchContainer + #locationSwitchContainer {
+           margin-top: 10px;
+      } */
 
 
       button:hover {
@@ -263,7 +283,7 @@
       }
        body.dark-mode #searchContainer {
           background-color: #1e1e1e; /* Dark mode container background */
-          box-shadow: 0 2px 4px rgba(255,255,255,0.1); /* Dark mode subtle elevation */
+          /* 移除暗色模式下的陰影效果 */
       }
        body.dark-mode #searchIcon {
           color: #ccc; /* Dark mode icon color */
@@ -402,7 +422,8 @@
             padding: 8px 12px; /* Adjust padding */
         }
         #keyword {
-          width: calc(100% - 34px); /* Assuming 24px icon + 10px margin */
+          /* Adjusted width to leave space for the icon and toggle */
+          flex-grow: 1; /* Allow keyword to grow */
           margin-right: 0;
           margin-bottom: 0; /* No margin-bottom in row layout */
           border-radius: 28px; /* Keep rounded corners like default */
@@ -421,6 +442,11 @@
              align-items: center;
              justify-content: center;
          }
+        /* 定位開關容器在窄螢幕下的樣式 */
+        #locationSwitchContainer {
+            margin-left: 10px; /* 調整間距 */
+            padding-right: 0; /* 移除右側內邊距 */
+        }
 
         button {
           width: 100%;
@@ -443,7 +469,8 @@
              padding: 10px; /* 更小的螢幕間距 */
          }
          #keyword {
-             width: calc(100% - 34px); /* Assuming 24px icon + 10px margin */
+             /* Adjusted width for smaller screens if needed, keeping room for icon and toggle */
+             flex-grow: 1; /* Allow keyword to grow */
              padding: 0 10px; /* Padding controlled by container */
          }
           #searchIcon {
@@ -474,45 +501,7 @@
         color: #007BFF;
         text-align: center;
       }
-      .switch {
-        position: relative;
-        display: inline-block;
-        width: 50px;
-        height: 24px;
-      }
-      .switch input {
-        opacity: 0;
-        width: 0;
-        height: 0;
-      }
-      .slider {
-        position: absolute;
-        cursor: pointer;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: #ccc;
-        transition: .4s;
-        border-radius: 24px;
-      }
-      .slider:before {
-        position: absolute;
-        content: "";
-        height: 18px;
-        width: 18px;
-        left: 3px;
-        bottom: 3px;
-        background-color: white;
-        transition: .4s;
-        border-radius: 50%;
-      }
-      input:checked + .slider {
-        background-color: #007BFF;
-      }
-      input:checked + .slider:before {
-        transform: translateX(26px);
-      }
+      /* 移除 .switch, .slider 相關樣式 */
     </style>
   </head>
   <body>
@@ -526,13 +515,7 @@
       <div id="searchContainer">
         <input type="text" id="keyword" placeholder="請輸入站點名稱、地址" value="" />
         <span id="searchIcon" class="material-icons" title="搜尋">search</span>
-      </div>
-      <div id="locationSwitchContainer" style="display: flex; align-items: center; justify-content: center; margin: 10px 0;">
-        <label class="switch" style="margin: 0;">
-          <input type="checkbox" id="toggleUseLocation" aria-labelledby="locationSwitchText">
-          <span class="slider"></span>
-        </label>
-        <span id="locationSwitchText" style="margin-left: 10px;"></span>
+        <span id="locationIcon" class="material-icons" title="使用定位">my_location</span>
       </div>
       <div id="results"></div>
       <div id="loading">載入中，請稍候...</div>
@@ -577,21 +560,37 @@
       const maxResults = 100;
       const defaultSearchArea = "";
       const pinnedStations = new Set(JSON.parse(localStorage.getItem('pinnedStations') || '[]').map(id => String(id)));
-      const useLocationSetting = localStorage.getItem("useLocation");
-      const useLocation = useLocationSetting === null ? true : useLocationSetting === "true";
-      document.getElementById('toggleUseLocation').checked = useLocation;
-      document.getElementById('toggleUseLocation').addEventListener('change', function () {
-        localStorage.setItem("useLocation", this.checked);
-        if (this.checked) {
+      // 直接從 localStorage 讀取 useLocation 狀態，不再使用開關的 checked 屬性
+      let useLocation = localStorage.getItem("useLocation") === "true"; 
+      
+      // 獲取定位圖示元素
+      const locationIcon = document.getElementById('locationIcon');
+
+      // 初始化定位圖示的 active 狀態
+      if (useLocation) {
+        locationIcon.classList.add('active');
+      } else {
+        locationIcon.classList.remove('active');
+      }
+
+      // 點擊定位圖示切換定位功能
+      locationIcon.addEventListener('click', () => {
+        useLocation = !useLocation; // 切換狀態
+        localStorage.setItem("useLocation", useLocation); // 更新 localStorage
+
+        if (useLocation) {
+          locationIcon.classList.add('active');
           sortingLocked = true;
           getLocation();
         } else {
+          locationIcon.classList.remove('active');
           userLocation = { latitude: defaultLatitude, longitude: defaultLongitude };
           searchYouBike();
           updateVehicleData();
           setTimeout(updateResultsOrder, 1500);
         }
       });
+
       function togglePinStation(stationId, event) {
         event.stopPropagation();
 
@@ -1036,7 +1035,8 @@
         console.error("Geolocation update error:", error);
       }
       function getLocation() {
-        if (!document.getElementById('toggleUseLocation').checked) {
+        // 檢查 useLocation 狀態，而不是開關的 checked 屬性
+        if (!useLocation) {
           return;
         }
         if (navigator.geolocation) {
@@ -1065,7 +1065,8 @@
             }
           );
           setInterval(() => {
-            if (document.getElementById('toggleUseLocation').checked) {
+            // 檢查 useLocation 狀態，而不是開關的 checked 屬性
+            if (useLocation) {
               navigator.geolocation.getCurrentPosition(
                 handleGeoUpdateSuccess,
                 handleGeoUpdateError,
@@ -1141,7 +1142,7 @@
       });
       if (localStorage.getItem("dark_mode") === "true") {
         document.body.classList.add("dark-mode");
-        darkModeToggle.innerHTML = '<span style="color:#ffd700; font-size:32px;">☀️</span>';
+        darkModeToggle.innerHTML = '<span style="color:#ffd700; font-size:32px;">☀️';
       }
 
       // 設定目前語言，預設為中文
@@ -1150,9 +1151,10 @@
       // 更新頁面上所有與定位開關相關的文字，確保英文模式下不顯示中文
       function updateLanguageTexts() {
         document.title = currentLang === "en" ? "YouBike Site Search : A simple, beautiful site search engine" : "YouBike 站點搜尋 : 一個簡單、美觀、低流量的YouBike站點搜尋器";
-        const locationSwitchSpan = document.querySelector('#locationSwitchText');
-        if (locationSwitchSpan) {
-          locationSwitchSpan.textContent = currentLang === "en" ? "Use Location" : "使用定位";
+        // 將定位開關的文字替換為圖示的 title 屬性
+        const locationIcon = document.querySelector('#locationIcon');
+        if (locationIcon) {
+          locationIcon.title = currentLang === "en" ? "Use Location" : "使用定位";
         }
         const heading = document.getElementById('heading');
         if (heading) {
@@ -1208,6 +1210,7 @@
 
       modalButton.addEventListener('click', hideModal);
       window.addEventListener('load', () => {
+        // 根據 useLocation 狀態決定是否啟用定位
         if (useLocation) {
           getLocation();
         } else {
