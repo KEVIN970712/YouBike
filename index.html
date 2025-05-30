@@ -10,21 +10,29 @@
     <title>YouBike 站點搜尋 : 一個簡單、美觀、低流量的YouBike站點搜尋器</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="manifest" href="/YouBike/manifest.json" />
     <link rel="icon" type="image/x-icon" href="https://potatosserver.github.io/YouBike/icons/icon.ico" />
     <style>
+      /* 基本樣式 */
       body {
         font-family: 'Noto Sans TC', Arial, sans-serif;
         margin: 20px;
         background: #f4f4f4;
         transition: background 0.5s ease, color 0.5s ease;
       }
-      h1 {
-        color: #007BFF;
-        text-align: center;
-        margin-bottom: 20px;
+
+      /* Canvas 樣式取代 H1 */
+      #headingCanvas {
+        display: block; /* 確保獨佔一行 */
+        margin: 0 auto 20px auto; /* 置中並設定下方間距 */
+        background-color: transparent; /* 透明背景 */
+        max-width: 500px; /* 限制最大寬度 */
+        width: 100%; /* 響應式寬度 */
+        height: 60px; /* 固定高度，可根據字體大小調整 */
       }
+
       /* Material 3 風格的搜尋欄容器 */
       #searchContainer {
         display: flex;
@@ -36,15 +44,13 @@
         position: relative;
         padding: 8px 16px; /* 調整內部間距，左右16px */
         box-sizing: border-box; /* 確保 padding 不會增加總寬度 */
-        background-color: white; /* Default background */
+        background-color: white; /* 預設背景 */
         border-radius: 28px; /* 大圓角 */
-        /* 移除陰影效果 */
         transition: box-shadow 0.3s ease;
       }
 
       body.dark-mode #searchContainer {
-          background-color: #1e1e1e; /* Dark mode background */
-          /* 移除暗色模式下的陰影效果 */
+          background-color: #1e1e1e; /* 暗色模式背景 */
       }
 
       /* Material 3 風格的搜尋輸入框 */
@@ -60,16 +66,15 @@
         overflow-wrap: break-word;
         display: block;
         background-color: transparent; /* 透明背景，顯示 container 背景 */
-        color: #333; /* Default text color */
+        color: #333; /* 預設文字顏色 */
       }
 
       body.dark-mode #keyword {
-          color: #ffffff; /* Dark mode text color */
+          color: #ffffff; /* 暗色模式文字顏色 */
       }
 
       #keyword:focus {
         outline: none; /* 移除預設 focus 框 */
-        /* 這裡可以添加 Material 3 風格的 focus 效果 */
       }
 
       /* 搜尋 icon 樣式 (Material Icons) */
@@ -78,23 +83,22 @@
         margin-left: 10px; /* 與 input 之間的間距 */
         font-size: 24px; /* Material Icons 預設大小 */
         cursor: pointer;
-        color: #555; /* Default icon color */
+        color: #555; /* 預設 icon 顏色 */
         transition: color 0.3s ease;
         flex-shrink: 0; /* 防止 icon 縮小 */
-        /* Material Icons 需要這些樣式 */
         display: inline-flex; /* 使用 flex 讓 icon 居中 */
         align-items: center;
         justify-content: center;
-        width: 24px; /* 設置寬度 */
-        height: 24px; /* 設置高度 */
+        width: 24px; /* 設定寬度 */
+        height: 24px; /* 設定高度 */
       }
 
       body.dark-mode #searchIcon {
-          color: #ccc; /* Dark mode icon color */
+          color: #ccc; /* 暗色模式 icon 顏色 */
       }
 
       #searchIcon:hover {
-        color: #007BFF; /* Hover color */
+        color: #007BFF; /* 懸停顏色 */
       }
 
       /* 定位圖示樣式 */
@@ -257,29 +261,22 @@
       .modal button:hover {
         background-color: #0056b3;
       }
+      /* 暗色模式樣式 */
       body.dark-mode {
         background: #333;
         color: #ffffff;
         transition: background 0.5s ease, color 0.5s ease;
       }
-      body.dark-mode h1 {
-        color: #90CAF9;
-      }
       body.dark-mode #keyword {
-        /* 在 dark mode 下，keyword 的背景應該是透明的，這樣 searchContainer 的背景才能顯示 */
         background-color: transparent;
         color: #ffffff;
-        border-color: #90caf9; /* 這個 border-color 其實不會顯示，因為 border: none */
-      }
-      body.dark-mode #keyword:focus {
-         /* 暗色模式下的 focus 效果 */
+        border-color: #90caf9;
       }
        body.dark-mode #searchContainer {
-          background-color: #1e1e1e; /* Dark mode container background */
-          /* 移除暗色模式下的陰影效果 */
+          background-color: #1e1e1e;
       }
        body.dark-mode #searchIcon {
-          color: #ccc; /* Dark mode icon color */
+          color: #ccc;
       }
       body.dark-mode button {
         background-color: #90caf9;
@@ -314,9 +311,8 @@
         background-color: rgba(51, 51, 51, 0.9);
       }
       body.dark-mode #loadingText {
-        /* 修正載入文字在暗色模式下的顏色 */
         color: #90CAF9; 
-        background: none; /* 移除不必要的背景設定 */
+        background: none;
       }
       body.dark-mode #noticeBox {
         background-color: #000;
@@ -324,7 +320,7 @@
         border: 1px solid #444;
       }
       
-      /* Styles for the combined floating menu options */
+      /* 浮動選單選項樣式 */
       #floatingMenuOptions {
           position: fixed;
           bottom: 120px; /* Position above the main toggle button */
@@ -362,7 +358,7 @@
           transform: scale(1.1);
       }
 
-      /* Specific styles for dark mode toggle and language toggle within the combined menu */
+      /* 暗色模式切換和語言切換的特定樣式 */
       #darkModeToggle, #langToggle {
           background: linear-gradient(135deg, #007BFF, #0056b3);
           color: white;
@@ -379,7 +375,7 @@
         background: linear-gradient(135deg, #64b5f6, #42a5f5);
       }
 
-      /* Main toggle button (gear icon) */
+      /* 主要切換按鈕 (齒輪圖示) */
       #mainToggleButton {
         position: fixed;
         bottom: 60px; /* Position above update countdown */
@@ -504,8 +500,8 @@
         <h2 id="loadingText">載入中</h2>
         </div>
     </div>
-    <div id="mainContent" style="display:none;">
-      <h1 id="heading"></h1>
+    <div id="mainContent">
+      <canvas id="headingCanvas" width="500" height="60"></canvas>
       <div id="searchContainer">
         <input type="text" id="keyword" placeholder="請輸入站點名稱、地址" value="" />
         <span id="searchIcon" class="material-icons" title="搜尋">search</span>
@@ -535,7 +531,7 @@
       <button id="mainToggleButton" title="設定" style="position: fixed; bottom: 60px; right: 20px; z-index: 1200; width: 50px; height: 50px; background: white; color: black; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); transition: transform 0.2s ease;">⚙️</button>
     </div>
     <button id="updateCountdown" style="display:none; position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); z-index: 1000; padding: 6px 12px; background-color: white; color: #007bff; border: 2px solid #007bff; border-radius: 25px; font-size: 0.8em; box-shadow: 0 2px 6px rgba(0,0,0,0.2); transition: all 0.3s ease; width: 100px;">60秒後更新</button>
-    <script>
+    <script defer>
       let userLocation = null;
       let sortingLocked = false;
       let initialLoad = true;
@@ -620,12 +616,11 @@
       function showMainContent() {
         if (!mainContentShown) {
           const overlay = document.getElementById("loadingOverlay");
-          const mainContent = document.getElementById("mainContent");
+          // mainContent 現在預設是顯示的，所以不需要改變它的 display 樣式
           if (navigator.onLine) {
             overlay.style.opacity = "0";
             setTimeout(() => {
               overlay.style.display = "none";
-              mainContent.style.display = "block";
               document.getElementById('updateCountdown').style.display = "block";
             }, 500);
           } else {
@@ -634,7 +629,6 @@
             overlay.style.opacity = "1";
             setTimeout(() => {
               overlay.style.display = "none";
-              mainContent.style.display = "block";
               document.getElementById('updateCountdown').style.display = "block";
             }, 3000);
           }
@@ -1117,7 +1111,7 @@
               const ybeEl = card.querySelector('.vehicle_ybe');
               const emptyEl = card.querySelector('.vehicle_empty');
               if (yb2El) yb2El.textContent = (data.available_2_0 !== undefined ? data.available_2_0 : '未知');
-              if (ybeEl) ybeEl.textContent = (data.available_e !== undefined ? data.available_e : '未知');
+              if (ybeEl) yb2El.textContent = (data.available_e !== undefined ? data.available_e : '未知');
               if (emptyEl) emptyEl.textContent = (data.empty_spaces !== undefined ? data.empty_spaces : '未知');
             });
             updateResultsOrder();
@@ -1126,6 +1120,33 @@
             console.error("Vehicle data update failed:", error);
           });
       }
+
+      // Canvas 繪製標題邏輯
+      const headingCanvas = document.getElementById('headingCanvas');
+      const ctx = headingCanvas.getContext('2d');
+
+      function drawHeading() {
+        // 根據父容器調整 Canvas 尺寸，以實現響應式
+        const parentWidth = headingCanvas.parentElement.clientWidth;
+        headingCanvas.width = Math.min(parentWidth - 40, 500); // 減去 margin 20px * 2
+        headingCanvas.height = 60; // 固定高度
+
+        ctx.clearRect(0, 0, headingCanvas.width, headingCanvas.height); // 清除舊內容
+
+        const headingText = currentLang === "en" ? "YouBike Station Search" : "YouBike 站點搜尋";
+        const isDarkMode = document.body.classList.contains("dark-mode");
+        const textColor = isDarkMode ? '#90CAF9' : '#007BFF';
+
+        // 設定字體樣式
+        ctx.font = 'bold 24px "Noto Sans TC", Arial, sans-serif'; // 使用 Noto Sans TC 字體
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = textColor;
+
+        // 繪製文字
+        ctx.fillText(headingText, headingCanvas.width / 2, headingCanvas.height / 2);
+      }
+
       // Dark mode toggle logic (now within floatingMenuOptions)
       const darkModeToggle = document.getElementById('darkModeToggle');
       darkModeToggle.addEventListener('click', () => {
@@ -1133,6 +1154,7 @@
         const isDark = document.body.classList.contains("dark-mode");
         localStorage.setItem("dark_mode", isDark);
         darkModeToggle.innerHTML = isDark ? '<span style="color:#ffd700; font-size:32px;">☀️</span>' : '🌙';
+        drawHeading(); // 更新 Canvas 標題顏色
       });
       if (localStorage.getItem("dark_mode") === "true") {
         document.body.classList.add("dark-mode");
@@ -1145,15 +1167,12 @@
       // 更新頁面上所有與定位開關相關的文字，確保英文模式下不顯示中文
       function updateLanguageTexts() {
         document.title = currentLang === "en" ? "YouBike Site Search : A simple, beautiful site search engine" : "YouBike 站點搜尋 : 一個簡單、美觀、低流量的YouBike站點搜尋器";
-        // 將定位開關的文字替換為圖示的 title 屬性
         const locationIcon = document.querySelector('#locationIcon');
         if (locationIcon) {
           locationIcon.title = currentLang === "en" ? "Use Location" : "使用定位";
         }
-        const heading = document.getElementById('heading');
-        if (heading) {
-            heading.textContent = currentLang === "en" ? "YouBike Station Search" : "YouBike 站點搜尋";
-        }
+        // 標題現在由 Canvas 繪製，所以不需要更新 heading 元素的 textContent
+        drawHeading(); // 更新 Canvas 標題文字
         const keywordInput = document.getElementById('keyword');
         if (keywordInput) {
           keywordInput.placeholder = currentLang === "en" ? "Please enter station name or address" : "請輸入站點名稱、地址";
@@ -1211,6 +1230,7 @@
           userLocation = { latitude: defaultLatitude, longitude: defaultLongitude };
           searchYouBike();
         }
+        drawHeading(); // 頁面載入後繪製 Canvas 標題
       });
       keywordInput.addEventListener('keypress', function (event) {
         if (event.key === 'Enter') {
@@ -1223,11 +1243,13 @@
         floatingMenuOptions.classList.remove('show');
     });
 
-document.getElementById('heading').addEventListener('click', function() {
-    keywordInput.value = '';
-    countdownTimer.reset(); // 重設倒數計時
-    searchYouBike();
-});
+    // 點擊 Canvas 標題時清空搜尋並重設倒數計時
+    headingCanvas.addEventListener('click', function() {
+        keywordInput.value = '';
+        countdownTimer.reset(); // 重設倒數計時
+        searchYouBike();
+    });
+
 const searchIcon = document.getElementById('searchIcon');
 searchIcon.addEventListener('click', searchYouBike);
 let countdownTimer = {
@@ -1256,6 +1278,10 @@ countdownTimer.updateButton.addEventListener('click', () => {
     countdownTimer.reset();
     countdownTimer.updateDisplay();
 });
+
+// 監聽視窗大小變化，重新繪製 Canvas 標題以保持響應式
+window.addEventListener('resize', drawHeading);
+
     </script>
     <script defer>
       // Register Service Worker non-blocking
