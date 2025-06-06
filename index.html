@@ -5,9 +5,9 @@
     <meta charset="UTF-8" />
     <meta name="author" content="卓稟鈞(AndrewCho)">
     <meta name="description" content="一個專為 YouBike 設計的簡單、美觀且低流量站點搜尋器，提供快速查詢站點資訊功能，滿足即時需求，適合所有用戶使用。">    
-    <meta name="keywords" content="YouBike, youBike, YouBike2.0, youBike2.0, ubike, ibike, obike, kbike, 微笑單車，公共自行車, 腳踏車，YouBike站點搜尋, 站點搜尋, YouBike 資訊, YouBike據點，ubike據點 ，附近站點, 附近YouBike站點, 全台YouBike, 台北YouBike, 新北YouBike, 桃園YouBike, 新竹YouBike, 苗栗YouBike, 臺中YouBike, 嘉義YouBike , 臺南YouBike, 高雄YouBike, 屏東YouBike, 臺東YouBike , YouBike即時資訊, 定位功能, Github, github.io" />
+    <meta name="keywords" content="YouBike, youBike, YouBike2.0, youBike2.0, ubike, ibike, obike, kbike, 微笑單車，公共自行車, 腳踏車，YouBike站點搜尋, 站點搜尋, YouBike 資訊, YouBike據點，ubike據點 ，附近站點, 附近YouBike站點, 全台YouBike, 台北YouBike, 新北YouBike, 桃園YouBike, 新竹YouBike, 苗栗YouBike, 臺中YouBike, 嘉義YouBike , 臺南YouBike, 高雄YouBike, 屏東YouBike, 臺東YouBike , YouBike即時資訊, 定位功能, github, github.io, youbike線上查詢" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>YouBike 站點搜尋 : 一個簡單、美觀、低流量的YouBike站點搜尋器</title>
+    <title>YouBike 站點搜尋 : 線上YouBike站點搜尋器</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -38,13 +38,11 @@
         box-sizing: border-box; /* 確保 padding 不會增加總寬度 */
         background-color: white; /* Default background */
         border-radius: 28px; /* 大圓角 */
-        /* 移除陰影效果 */
         transition: box-shadow 0.3s ease;
       }
 
       body.dark-mode #searchContainer {
           background-color: #1e1e1e; /* Dark mode background */
-          /* 移除暗色模式下的陰影效果 */
       }
 
       /* Material 3 風格的搜尋輸入框 */
@@ -67,9 +65,12 @@
           color: #ffffff; /* Dark mode text color */
       }
 
+      body.dark-mode #keyword::placeholder {
+          color: rgba(255, 255, 255, 0.7); /* 較亮的白色，半透明 */
+      }
+
       #keyword:focus {
         outline: none; /* 移除預設 focus 框 */
-        /* 這裡可以添加 Material 3 風格的 focus 效果 */
       }
 
       /* 搜尋 icon 樣式 (Material Icons) */
@@ -206,8 +207,8 @@
         display: none;
         opacity: 0;
         transition: opacity 0.5s ease;
-        white-space: nowrap;  /* 新增: 避免文字換行 */
-        width: auto;         /* 新增: 動態調整寬度 */
+        white-space: nowrap;  /* 避免文字換行 */
+        width: auto;         /* 動態調整寬度 */
       }
       #loading.show {
         opacity: 1;
@@ -266,17 +267,13 @@
         color: #90CAF9;
       }
       body.dark-mode #keyword {
-        /* 在 dark mode 下，keyword 的背景應該是透明的，這樣 searchContainer 的背景才能顯示 */
         background-color: transparent;
         color: #ffffff;
-        border-color: #90caf9; /* 這個 border-color 其實不會顯示，因為 border: none */
       }
       body.dark-mode #keyword:focus {
-         /* 暗色模式下的 focus 效果 */
       }
        body.dark-mode #searchContainer {
           background-color: #1e1e1e; /* Dark mode container background */
-          /* 移除暗色模式下的陰影效果 */
       }
        body.dark-mode #searchIcon {
           color: #ccc; /* Dark mode icon color */
@@ -314,9 +311,7 @@
         background-color: rgba(51, 51, 51, 0.9);
       }
       body.dark-mode #loadingText {
-        /* 修正載入文字在暗色模式下的顏色 */
-        color: #90CAF9; 
-        background: none; /* 移除不必要的背景設定 */
+        color: #90CAF9;  
       }
       body.dark-mode #noticeBox {
         background-color: #000;
@@ -801,6 +796,7 @@
             const vehicle = isOnline ? (Object.entries(vehData).find(([key]) => key === info.id)?.[1] || {}) : {};
             return { station_info: info, vehicle_info: vehicle };
           });
+          resultsDiv.innerHTML = ''; // 清除現有結果
           organizedOutput.forEach(item => {
             const station = item.station_info;
             const vehicle = item.vehicle_info;
@@ -842,30 +838,17 @@
                           <p>${addressLabel} ${station.address || unknownAddress}</p>
                           ${vehicleInfoHtml}
                       `;
-            if (card) {
-              card.innerHTML = cardContent;
-              card.dataset.lat = station.coords[0];
-              card.dataset.lng = station.coords[1];
-              card.style.width = window.innerWidth < 768 ? (window.innerWidth < 480 ? "100%" : "calc(50% - 10px)") : "calc(33% - 14px)";
-            } else {
-              card = document.createElement('div');
-              card.className = 'station';
-              card.dataset.id = station.id;
-              card.dataset.lat = station.coords[0];
-              card.dataset.lng = station.coords[1];
-              card.style.width = window.innerWidth < 768 ? (window.innerWidth < 480 ? "100%" : "calc(50% - 10px)") : "calc(33% - 14px)";
-              card.innerHTML = cardContent;
-              resultsDiv.appendChild(card);
-            }
+            card = document.createElement('div');
+            card.className = 'station';
+            card.dataset.id = station.id;
+            card.dataset.lat = station.coords[0];
+            card.dataset.lng = station.coords[1];
+            card.style.width = window.innerWidth < 768 ? (window.innerWidth < 480 ? "100%" : "calc(50% - 10px)") : "calc(33% - 14px)";
+            card.innerHTML = cardContent;
+            resultsDiv.appendChild(card);
           });
-          const validIds = organizedOutput.map(item => item.station_info.id);
-          Array.from(resultsDiv.children).forEach(card => {
-            if (!validIds.includes(card.dataset.id)) {
-              resultsDiv.removeChild(card);
-            }
-          });
+          
           updateResultsOrder();
-          await new Promise(resolve => setTimeout(resolve, 0));
 
           dataLoaded = true;
           if (showLoadingIndicator) {
