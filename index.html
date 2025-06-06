@@ -49,7 +49,7 @@
       #keyword {
         padding: 0 0 0 12px; /* 調整 padding-left 確保文字不會被遮蓋 */
         flex-grow: 1; /* 讓輸入框佔據可用空間 */
-        border: none; /* 移除邊框 */
+        border: none; /* 移除邊界 */
         border-radius: 0; /* 圓角由 container 控制 */
         margin: 0; /* 移除 margin */
         font-size: 16px;
@@ -357,20 +357,20 @@
           transform: scale(1.1);
       }
 
-      /* Specific styles for dark mode toggle and language toggle within the combined menu */
-      #darkModeToggle, #langToggle {
+      /* Specific styles for dark mode toggle within the combined menu */
+      #darkModeToggle {
           background: linear-gradient(135deg, #007BFF, #0056b3);
           color: white;
           font-size: 24px;
       }
-      #darkModeToggle:hover, #langToggle:hover {
+      #darkModeToggle:hover {
           background: linear-gradient(135deg, #0056b3, #003f7f);
       }
-      body.dark-mode #darkModeToggle, body.dark-mode #langToggle {
+      body.dark-mode #darkModeToggle {
         background: linear-gradient(135deg, #90caf9, #64b5f6);
         color: #121212;
       }
-      body.dark-mode #darkModeToggle:hover, body.dark-mode #langToggle:hover {
+      body.dark-mode #darkModeToggle:hover {
         background: linear-gradient(135deg, #64b5f6, #42a5f5);
       }
 
@@ -500,7 +500,7 @@
         </div>
     </div>
     <div id="mainContent" style="display:none;">
-      <h1 id="heading"></h1>
+      <h1 id="heading">YouBike 站點搜尋</h1>
       <div id="searchContainer">
         <input type="text" id="keyword" placeholder="請輸入站點名稱、地址" value="" />
         <span id="searchIcon" class="material-icons" title="搜尋">search</span>
@@ -522,9 +522,6 @@
                 <img loading="lazy" src="https://potatosserver.github.io/YouBike/icons/python.webp" alt="YouBike Python" style="width:30px; height:30px;" />
           </a>
           <button id="darkModeToggle" title="切換暗色模式">🌙</button>
-          <button id="langToggle" title="Switch Language">
-            <img loading="lazy" src="https://potatosserver.github.io/YouBike/icons/translate.webp" alt="Translate" style="width:35px; height:35px;" />
-          </button>
       </div>
 
       <button id="mainToggleButton" title="設定" style="position: fixed; bottom: 60px; right: 20px; z-index: 1200; width: 50px; height: 50px; background: white; color: black; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); transition: transform 0.2s ease;">⚙️</button>
@@ -549,23 +546,19 @@
       const maxResults = 100;
       const defaultSearchArea = "";
       const pinnedStations = new Set(JSON.parse(localStorage.getItem('pinnedStations') || '[]').map(id => String(id)));
-      // 直接從 localStorage 讀取 useLocation 狀態
       let useLocation = localStorage.getItem("useLocation") === "true"; 
       
-      // 獲取定位圖示元素
       const locationIcon = document.getElementById('locationIcon');
 
-      // 初始化定位圖示的 active 狀態
       if (useLocation) {
         locationIcon.classList.add('active');
       } else {
         locationIcon.classList.remove('active');
       }
 
-      // 點擊定位圖示切換定位功能
       locationIcon.addEventListener('click', () => {
-        useLocation = !useLocation; // 切換狀態
-        localStorage.setItem("useLocation", useLocation); // 更新 localStorage
+        useLocation = !useLocation; 
+        localStorage.setItem("useLocation", useLocation); 
 
         if (useLocation) {
           locationIcon.classList.add('active');
@@ -583,24 +576,20 @@
       function togglePinStation(stationId, event) {
         event.stopPropagation();
 
-        // 統一轉換為字串類型
         const id = String(stationId);
 
-        // 更新 pinnedStations Set
         if (pinnedStations.has(id)) {
           pinnedStations.delete(id);
         } else {
           pinnedStations.add(id);
         }
 
-        // 立即更新 localStorage
         try {
           localStorage.setItem('pinnedStations', JSON.stringify([...pinnedStations]));
         } catch (e) {
           console.error('Failed to save pinned stations:', e);
         }
 
-        // 更新按鈕狀態
         const pinButton = document.querySelector(`.pin-button[data-id="${id}"]`);
         if (pinButton) {
           const isPinned = pinnedStations.has(id);
@@ -608,7 +597,6 @@
           pinButton.textContent = isPinned ? '★' : '☆';
         }
 
-        // 重新排序結果
         updateResultsOrder();
       }
       let mainContentShown = false;
@@ -616,30 +604,19 @@
         if (!mainContentShown) {
           const overlay = document.getElementById("loadingOverlay");
           const mainContent = document.getElementById("mainContent");
-          if (navigator.onLine) {
-            overlay.style.opacity = "0";
-            setTimeout(() => {
-              overlay.style.display = "none";
-              mainContent.style.display = "block";
-              document.getElementById('updateCountdown').style.display = "block";
-            }, 500);
-          } else {
-            const lang = localStorage.getItem("lang") || "zh";
-            document.getElementById("loadingText").textContent = lang === "en" ? "Offline mode starting..." : "離線模式啟動中...";
-            overlay.style.opacity = "1";
-            setTimeout(() => {
-              overlay.style.display = "none";
-              mainContent.style.display = "block";
-              document.getElementById('updateCountdown').style.display = "block";
-            }, 3000);
-          }
+          // Always show main content directly if online
+          overlay.style.opacity = "0";
+          setTimeout(() => {
+            overlay.style.display = "none";
+            mainContent.style.display = "block";
+            document.getElementById('updateCountdown').style.display = "block";
+          }, 500);
           mainContentShown = true;
         }
       }
       (function simulateLoadingPercentage() {
         const loadingText = document.getElementById("loadingText");
-        let lang = localStorage.getItem("lang") || "zh";
-        let prefix = lang === "en" ? "Loading:" : "載入中：";
+        let prefix = "載入中：";
         let progress = 0;
         let lockedProgress = null;
         loadingTextInterval = setInterval(() => {
@@ -665,40 +642,29 @@
         if (showLoadingIndicator) showLoading();
         const keyword = keywordInput.value.trim().toLowerCase();
         try {
-          if (navigator.onLine) {
-            if (!youbikeDataCache) {
-              const youbikeUrl = "https://apis.youbike.com.tw/json/station-min-yb2.json";
-              const response = await fetch(youbikeUrl, {
-                headers : {
-                  'accept': '*/*',
-                  'accept-language': 'zh-TW,zh;q=0.9',
-                }
-              });
-              if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-              const youbikeData = await response.json();
-              youbikeDataCache = Array.isArray(youbikeData)
-                ? youbikeData.map(item => ({ ...item, lat: parseFloat(item.lat), lng: parseFloat(item.lng) }))
-                : [];
-              localStorage.setItem('cachedYoubikeData', JSON.stringify(youbikeDataCache));
-            }
-          } else {
-            if (!youbikeDataCache) {
-              youbikeDataCache = JSON.parse(localStorage.getItem('cachedYoubikeData') || '[]').map(item => ({
-                ...item,
-                lat: parseFloat(item.lat),
-                lng: parseFloat(item.lng)
-              }));
-            }
+          // Always fetch from API, no offline cache logic
+          if (!youbikeDataCache) {
+            const youbikeUrl = "https://apis.youbike.com.tw/json/station-min-yb2.json";
+            const response = await fetch(youbikeUrl, {
+              headers : {
+                'accept': '*/*',
+                'accept-language': 'zh-TW,zh;q=0.9',
+              }
+            });
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const youbikeData = await response.json();
+            youbikeDataCache = Array.isArray(youbikeData)
+              ? youbikeData.map(item => ({ ...item, lat: parseFloat(item.lat), lng: parseFloat(item.lng) }))
+              : [];
+            // Remove localStorage.setItem('cachedYoubikeData', JSON.stringify(youbikeDataCache));
           }
+          
           let youbikeResults = youbikeDataCache;
           if (keyword) {
             youbikeResults = youbikeResults.filter(station => {
               const stationNameTW = station.name_tw ? station.name_tw.toLowerCase() : '';
               const stationAddressTW = station.address_tw ? station.address_tw.toLowerCase() : '';
-              const stationNameEN = station.name_en ? station.name_en.toLowerCase() : '';
-              const stationAddressEN = station.address_en ? station.address_en.toLowerCase() : '';
-              return stationNameTW.includes(keyword) || stationAddressTW.includes(keyword) ||
-                     stationNameEN.includes(keyword) || stationAddressEN.includes(keyword);
+              return stationNameTW.includes(keyword) || stationAddressTW.includes(keyword);
             });
           }
           youbikeResults = youbikeResults.sort((a, b) => {
@@ -778,31 +744,29 @@
             });
             usedStations = [...pinnedList, ...nonPinnedList];
           }
-          const isOnline = navigator.onLine;
+          const isOnline = navigator.onLine; // This will effectively always be true if offline mode is removed.
           let vehData = {};
           const stationIds = usedStations.map(station => String(station.station_no));
           if (isOnline) {
             vehData = await queryVehicleData(stationIds);
           }
-          // 修改站點資訊依語言切換: 若為英文則取英文屬性
           const organizedOutput = usedStations.map(site => {
             const info = {
               id: String(site.station_no),
-              name: currentLang === "en" ? site.name_en : site.name_tw,
+              name: site.name_tw,
               coords: [site.lat, site.lng],
-              district: currentLang === "en" ? site.district_en : site.district_tw,
-              address: currentLang === "en" ? site.address_en : site.address_tw
+              district: site.district_tw,
+              address: site.address_tw
             };
             const vehicle = isOnline ? (Object.entries(vehData).find(([key]) => key === info.id)?.[1] || {}) : {};
             return { station_info: info, vehicle_info: vehicle };
           });
-          resultsDiv.innerHTML = ''; // 清除現有結果
+          resultsDiv.innerHTML = ''; 
           organizedOutput.forEach(item => {
             const station = item.station_info;
             const vehicle = item.vehicle_info;
             let card = document.querySelector(`.station[data-id="${station.id}"]`);
 
-            // 確保釘選狀態判斷一致
             const isPinned = pinnedStations.has(String(station.id));
             const pinButtonHtml = `<span
               class="pin-button ${isPinned ? 'pinned' : ''}"
@@ -815,20 +779,19 @@
               station.coords[0],
               station.coords[1]
             );
-            const displayDistance = distance < 1 ? Math.round(distance * 1000) + (currentLang === "en" ? " m" : " 公尺")
-                                                 : distance.toFixed(2) + (currentLang === "en" ? " km" : " 公里");
-            const distanceLabel = currentLang === "en" ? "Distance:" : "距離:";
-            const addressLabel = currentLang === "en" ? "Address:" : "地址:";
-            const slotsLabel = currentLang === "en" ? "Available Slots:" : "可停空位數：";
-            const unknownStation = currentLang === "en" ? "Unknown Station" : "未知站點";
-            const unknownAddress = currentLang === "en" ? "Unknown Address" : "未知地址";
-            const unknownValue = currentLang === "en" ? "Unknown" : "未知";
+            const displayDistance = distance < 1 ? Math.round(distance * 1000) + " 公尺"
+                                                 : distance.toFixed(2) + " 公里";
+            const distanceLabel = "距離:";
+            const addressLabel = "地址:";
+            const slotsLabel = "可停空位數：";
+            const unknownStation = "未知站點";
+            const unknownAddress = "未知地址";
+            const unknownValue = "未知";
             const vehicleInfoHtml = isOnline ? `
                           <p>YouBike 2.0： <span class="vehicle_yb2">${vehicle?.available_2_0 !== undefined ? vehicle.available_2_0 : unknownValue}</span></p>
                           <p>YouBike 2.0E： <span class="vehicle_ybe">${vehicle?.available_e !== undefined ? vehicle.available_e : unknownValue}</span></p>
                           <p>${slotsLabel} <span class="vehicle_empty">${vehicle?.empty_spaces !== undefined ? vehicle.empty_spaces : unknownValue}</span></p>
                         ` : '';
-            // 當使用預設座標時不顯示距離
             const isDefaultLocation = userLocation && userLocation.latitude === defaultLatitude && userLocation.longitude === defaultLongitude;
             const distanceHTML = !isDefaultLocation ? `<p class="distance">${distanceLabel} ${displayDistance}</p>` : "";
             const cardContent = `
@@ -902,8 +865,16 @@
         return allVehicleData;
       }
       function updateResultsOrder() {
-        const cards = Array.from(document.querySelectorAll(".station"));
-        cards.sort((a, b) => {
+        const cards = document.querySelectorAll(".station");
+        cards.forEach(card => {
+          const pinButton = card.querySelector(".pin-button");
+          if (pinButton) {
+            pinButton.textContent = pinnedStations.has(card.dataset.id) ? '★' : '☆';
+            pinButton.classList.toggle('pinned', pinnedStations.has(card.dataset.id));
+          }
+        });
+
+        const sortedCards = Array.from(cards).sort((a, b) => {
           const aPinned = pinnedStations.has(a.dataset.id);
           const bPinned = pinnedStations.has(b.dataset.id);
           if (aPinned && !bPinned) return -1;
@@ -922,7 +893,7 @@
           );
           return distanceA - distanceB;
         });
-        cards.forEach(card => {
+        sortedCards.forEach(card => {
           resultsDiv.appendChild(card);
         });
       }
@@ -970,24 +941,16 @@
         let errorMessage = "";
         switch (error.code) {
           case error.PERMISSION_DENIED:
-            errorMessage = currentLang === "en"
-              ? "Location permission was denied; using default coordinates."
-              : "未提供定位權限，將使用預設座標進行定位。";
+            errorMessage = "未提供定位權限，將使用預設座標進行定位。";
             break;
           case error.POSITION_UNAVAILABLE:
-            errorMessage = currentLang === "en"
-              ? "Location information is unavailable; using default coordinates until the location is determined."
-              : "定位資訊不可用，將使用預設座標進行定位直到定位成功。";
+            errorMessage = "定位資訊不可用，將使用預設座標進行定位直到定位成功。";
             break;
           case error.TIMEOUT:
-            errorMessage = currentLang === "en"
-              ? "The location request timed out; using default coordinates until a successful location is acquired."
-              : "定位逾時，將使用預設座標進行定位直到定位成功。";
+            errorMessage = "定位逾時，將使用預設座標進行定位直到定位成功。";
             break;
           default:
-            errorMessage = currentLang === "en"
-              ? "A location error occurred; using default coordinates until a valid location is determined."
-              : "定位錯誤，將使用預設座標進行定位直到定位成功。";
+            errorMessage = "定位錯誤，將使用預設座標進行定位直到定位成功。";
             break;
         }
         showModal(errorMessage);
@@ -1012,7 +975,6 @@
         console.error("Geolocation update error:", error);
       }
       function getLocation() {
-        // 檢查 useLocation 狀態，而不是開關的 checked 屬性
         if (!useLocation) {
           return;
         }
@@ -1037,12 +999,11 @@
             },
             {
               enableHighAccuracy: true,
-              timeout: 10000, // 最大等待10秒
+              timeout: 10000, 
               maximumAge: 0
             }
           );
           setInterval(() => {
-            // 檢查 useLocation 狀態，而不是開關的 checked 屬性
             if (useLocation) {
               navigator.geolocation.getCurrentPosition(
                 handleGeoUpdateSuccess,
@@ -1073,13 +1034,12 @@
             lat, lng
           );
           const distanceEl = card.querySelector('.distance');
-          // 當使用預設座標時，隱藏距離顯示
           if (distanceEl) {
             if (userLocation && userLocation.latitude === defaultLatitude && userLocation.longitude === defaultLongitude) {
               distanceEl.textContent = "";
             } else {
-              const distanceLabel = currentLang === "en" ? "Distance:" : "距離:";
-              const unit = newDistance < 1 ? (currentLang === "en" ? " m" : " 公尺") : (currentLang === "en" ? " km" : " 公里");
+              const distanceLabel = "距離:";
+              const unit = newDistance < 1 ? " 公尺" : " 公里";
               const displayDistance = newDistance < 1 ? Math.round(newDistance * 1000) : newDistance.toFixed(2);
               distanceEl.textContent = distanceLabel + " " + displayDistance + unit;
             }
@@ -1109,7 +1069,6 @@
             console.error("Vehicle data update failed:", error);
           });
       }
-      // Dark mode toggle logic (now within floatingMenuOptions)
       const darkModeToggle = document.getElementById('darkModeToggle');
       darkModeToggle.addEventListener('click', () => {
         document.body.classList.toggle('dark-mode');
@@ -1122,72 +1081,52 @@
         darkModeToggle.innerHTML = '<span style="color:#ffd700; font-size:32px;">☀️';
       }
 
-      // 設定目前語言，預設為中文
-      let currentLang = localStorage.getItem("lang") || "zh";
-
-      // 更新頁面上所有與定位開關相關的文字，確保英文模式下不顯示中文
       function updateLanguageTexts() {
-        document.title = currentLang === "en" ? "YouBike Site Search : A simple, beautiful site search engine" : "YouBike 站點搜尋 : 一個簡單、美觀、低流量的YouBike站點搜尋器";
-        // 將定位開關的文字替換為圖示的 title 屬性
+        document.title = "YouBike 站點搜尋 : 一個簡單、美觀、低流量的YouBike站點搜尋器";
         const locationIcon = document.querySelector('#locationIcon');
         if (locationIcon) {
-          locationIcon.title = currentLang === "en" ? "Use Location" : "使用定位";
+          locationIcon.title = "使用定位";
         }
         const heading = document.getElementById('heading');
         if (heading) {
-            heading.textContent = currentLang === "en" ? "YouBike Station Search" : "YouBike 站點搜尋";
+            heading.textContent = "YouBike 站點搜尋";
         }
         const keywordInput = document.getElementById('keyword');
         if (keywordInput) {
-          keywordInput.placeholder = currentLang === "en" ? "Please enter station name or address" : "請輸入站點名稱、地址";
+          keywordInput.placeholder = "請輸入站點名稱、地址";
         }
         const updateCountdownBtn = document.getElementById('updateCountdown');
         if (updateCountdownBtn) {
-          updateCountdownBtn.textContent = currentLang === "en" ? "60 sec update " : "60秒後更新";
+          updateCountdownBtn.textContent = "60秒後更新";
         }
         const loadingDiv = document.getElementById('loading');
         if (loadingDiv) {
-          loadingDiv.textContent = currentLang === "en" ? "Loading, please wait..." : "載入中，請稍候...";
+          loadingDiv.textContent = "載入中，請稍候...";
         }
       }
-      updateLanguageTexts();
-
-      // 語言切換按鈕事件：直接更新文字，不再重新載入頁面
-      const langToggle = document.getElementById('langToggle');
-      langToggle.addEventListener('click', (event) => {
-        event.stopPropagation();
-        currentLang = currentLang === "en" ? "zh" : "en";
-        localStorage.setItem("lang", currentLang);
-        updateLanguageTexts();
-        // 直接呼叫 searchYouBike 更新站點卡片文字，不顯示 loading 效果 
-        searchYouBike(false);
-      });
+      updateLanguageTexts(); 
 
       const mainToggleButton = document.getElementById('mainToggleButton');
       const floatingMenuOptions = document.getElementById('floatingMenuOptions');
 
       mainToggleButton.addEventListener('click', (event) => {
-        event.stopPropagation(); // Prevent document click from immediately closing
+        event.stopPropagation(); 
         floatingMenuOptions.classList.toggle('show');
       });
 
-      // Close panels when clicking anywhere else on the document
       document.addEventListener('click', (event) => {
-          // Check if the click target is outside the mainToggleButton and floatingMenuOptions
           if (!mainToggleButton.contains(event.target) && 
               !floatingMenuOptions.contains(event.target)) {
               floatingMenuOptions.classList.remove('show');
           }
       });
 
-      // Prevent clicks inside the panels from closing them
       floatingMenuOptions.addEventListener('click', (event) => {
         event.stopPropagation();
       });
 
       modalButton.addEventListener('click', hideModal);
       window.addEventListener('load', () => {
-        // 根據 useLocation 狀態決定是否啟用定位
         if (useLocation) {
           getLocation();
         } else {
@@ -1202,13 +1141,12 @@
       });
 
     window.addEventListener('scroll', () => {
-        // Close panels on scroll
         floatingMenuOptions.classList.remove('show');
     });
 
 document.getElementById('heading').addEventListener('click', function() {
     keywordInput.value = '';
-    countdownTimer.reset(); // 重設倒數計時
+    countdownTimer.reset(); 
     searchYouBike();
 });
 const searchIcon = document.getElementById('searchIcon');
@@ -1217,9 +1155,7 @@ let countdownTimer = {
     remaining: 60,
     updateButton: document.getElementById('updateCountdown'),
     updateDisplay: function() {
-        this.updateButton.textContent = currentLang === "en"
-            ? `${this.remaining} sec update `
-            : `${this.remaining}秒後更新`;
+        this.updateButton.textContent = `${this.remaining}秒後更新`;
     },
     reset: function() {
         this.remaining = 60;
@@ -1239,21 +1175,6 @@ countdownTimer.updateButton.addEventListener('click', () => {
     countdownTimer.reset();
     countdownTimer.updateDisplay();
 });
-    </script>
-    <script defer>
-      // Register Service Worker non-blocking
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function () {
-          navigator.serviceWorker
-            .register("../YouBike/service-worker.js")
-            .then(function (registration) {
-              console.log('Service Worker registered with scope:', registration.scope);
-            })
-            .catch(function (error) {
-              console.error('Service Worker registration failed:', error);
-            });
-        });
-      }
     </script>
   </body>
 </html>
