@@ -8,14 +8,13 @@
     <meta name="keywords" content="YouBike, youBike, YouBike2.0, youBike2.0, ubike, ibike, obike, kbike, 微笑單車，公共自行車, 腳踏車，YouBike站點搜尋, 站點搜尋, YouBike 資訊, YouBike據點，ubike據點 ，附近站點, 附近YouBike站點, 全台YouBike, 台北YouBike, 新北YouBike, 桃園YouBike, 新竹YouBike, 苗栗YouBike, 臺中YouBike, 嘉義YouBike , 臺南YouBike, 高雄YouBike, 屏東YouBike, 臺東YouBike , YouBike即時資訊, 定位功能, github, github.io, youbike線上查詢" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>YouBike 站點搜尋 : 線上YouBike站點搜尋器</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="manifest" href="/YouBike/manifest.json" />
     <link rel="icon" type="image/x-icon" href="https://potatosserver.github.io/YouBike/icons/icon.ico" />
     <style>
       body {
-        font-family: 'Noto Sans TC', Arial, sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", "Microsoft JhengHei", "PingFang TC", sans-serif;
         margin: 20px;
         background: #f4f4f4;
         transition: background 0.5s ease, color 0.5s ease;
@@ -604,7 +603,6 @@
         if (!mainContentShown) {
           const overlay = document.getElementById("loadingOverlay");
           const mainContent = document.getElementById("mainContent");
-          // Always show main content directly if online
           overlay.style.opacity = "0";
           setTimeout(() => {
             overlay.style.display = "none";
@@ -642,7 +640,6 @@
         if (showLoadingIndicator) showLoading();
         const keyword = keywordInput.value.trim().toLowerCase();
         try {
-          // Always fetch from API, no offline cache logic
           if (!youbikeDataCache) {
             const youbikeUrl = "https://apis.youbike.com.tw/json/station-min-yb2.json";
             const response = await fetch(youbikeUrl, {
@@ -656,7 +653,6 @@
             youbikeDataCache = Array.isArray(youbikeData)
               ? youbikeData.map(item => ({ ...item, lat: parseFloat(item.lat), lng: parseFloat(item.lng) }))
               : [];
-            // Remove localStorage.setItem('cachedYoubikeData', JSON.stringify(youbikeDataCache));
           }
           
           let youbikeResults = youbikeDataCache;
@@ -744,7 +740,7 @@
             });
             usedStations = [...pinnedList, ...nonPinnedList];
           }
-          const isOnline = navigator.onLine; // This will effectively always be true if offline mode is removed.
+          const isOnline = navigator.onLine; 
           let vehData = {};
           const stationIds = usedStations.map(station => String(station.station_no));
           if (isOnline) {
