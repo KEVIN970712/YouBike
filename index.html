@@ -175,6 +175,11 @@
         word-wrap: break-word;
         overflow-wrap: break-word;
       }
+      /* YouBike 2.0E 數字顏色樣式 */
+      .station .vehicle_ybe[data-e-bikes]:not([data-e-bikes="0"]):not([data-e-bikes="未知"]) {
+        color: #ffe200; /* 當 YouBike 2.0E 車數大於 0 時的顏色 */
+        font-weight: bold; /* 可選：加粗字體 */
+      }
       .station .pin-button {
         position: absolute;
         top: 10px;
@@ -781,9 +786,12 @@
             const unknownStation = "未知站點";
             const unknownAddress = "未知地址";
             const unknownValue = "未知";
+
+            const youbikeECount = vehicle?.available_e !== undefined ? vehicle.available_e : unknownValue;
+
             const vehicleInfoHtml = isOnline ? `
                           <p>YouBike 2.0： <span class="vehicle_yb2">${vehicle?.available_2_0 !== undefined ? vehicle.available_2_0 : unknownValue}</span></p>
-                          <p>YouBike 2.0E： <span class="vehicle_ybe">${vehicle?.available_e !== undefined ? vehicle.available_e : unknownValue}</span></p>
+                          <p>YouBike 2.0E： <span class="vehicle_ybe" data-e-bikes="${youbikeECount}">${youbikeECount}</span></p>
                           <p>${slotsLabel} <span class="vehicle_empty">${vehicle?.empty_spaces !== undefined ? vehicle.empty_spaces : unknownValue}</span></p>
                         ` : '';
             const isDefaultLocation = userLocation && userLocation.latitude === defaultLatitude && userLocation.longitude === defaultLongitude;
@@ -1054,7 +1062,11 @@
               const ybeEl = card.querySelector('.vehicle_ybe');
               const emptyEl = card.querySelector('.vehicle_empty');
               if (yb2El) yb2El.textContent = (data.available_2_0 !== undefined ? data.available_2_0 : '未知');
-              if (ybeEl) ybeEl.textContent = (data.available_e !== undefined ? data.available_e : '未知');
+              if (ybeEl) {
+                  const youbikeECount = data.available_e !== undefined ? data.available_e : '未知';
+                  ybeEl.textContent = youbikeECount;
+                  ybeEl.dataset.eBikes = youbikeECount; // 更新 data-e-bikes 屬性
+              }
               if (emptyEl) emptyEl.textContent = (data.empty_spaces !== undefined ? data.empty_spaces : '未知');
             });
             updateResultsOrder();
