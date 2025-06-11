@@ -37,12 +37,12 @@
         background-color: white; /* Default background */
         border-radius: 28px; /* 大圓角 */
         transition: box-shadow 0.3s ease;
-        border: 1.5px solid #007BFF
+        border: 1.5px solid #007BFF;
       }
 
       body.dark-mode #searchContainer {
           background-color: #1e1e1e; /* Dark mode background */
-          border: 1.5px solid #90CAF9;
+          border: 1.5px solid #90CAF9; 
       }
 
       /* Material 3 風格的搜尋輸入框 */
@@ -501,7 +501,7 @@
     <div id="mainContent" style="display:none;">
       <h1 id="heading">YouBike 站點搜尋</h1>
       <div id="searchContainer">
-        <input type="text" id="keyword" placeholder="請輸入站點名稱、地址" value="" />
+        <input type="text" id="keyword" placeholder="請輸入站點名稱、地址" value="" onfocus="this.placeholder=''" onblur="this.placeholder='請輸入站點名稱、地址'" />
         <span id="searchIcon" class="material-icons" title="搜尋">search</span>
         <span id="locationIcon" class="material-icons" title="使用定位">my_location</span>
       </div>
@@ -1089,7 +1089,8 @@
         }
         const keywordInput = document.getElementById('keyword');
         if (keywordInput) {
-          keywordInput.placeholder = "請輸入站點名稱、地址";
+          // Changed to update placeholder text based on focus/blur events
+          keywordInput.placeholder = "請輸入站點名稱、地址"; 
         }
         const updateCountdownBtn = document.getElementById('updateCountdown');
         if (updateCountdownBtn) {
