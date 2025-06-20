@@ -11,7 +11,9 @@
     
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="manifest" href="/YouBike/manifest.json" />
-    <link rel="icon" type="image/x-icon" href="https://potatosserver.github.io/YouBike/icons/icon.ico" />
+    <link rel="icon" type="image/x-x-icon" href="https://potatosserver.github.io/YouBike/icons/icon.ico" />
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <style>
       body {
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", "Microsoft JhengHei", "PingFang TC", sans-serif;
@@ -23,7 +25,6 @@
         text-align: center;
         margin-bottom: 20px;
       }
-      /* Material 3 風格的搜尋欄容器 */
       #searchContainer {
         display: flex;
         align-items: center;
@@ -32,89 +33,85 @@
         max-width: 500px;
         width: 100%;
         position: relative;
-        padding: 8px 16px; /* 調整內部間距，左右16px */
-        box-sizing: border-box; /* 確保 padding 不會增加總寬度 */
-        background-color: white; /* Default background */
-        border-radius: 28px; /* 大圓角 */
+        padding: 8px 16px; 
+        box-sizing: border-box; 
+        background-color: white; 
+        border-radius: 28px; 
         transition: box-shadow 0.3s ease;
         border: 1.5px solid #007BFF;
       }
 
       body.dark-mode #searchContainer {
-          background-color: #1e1e1e; /* Dark mode background */
+          background-color: #1e1e1e; 
           border: 1.5px solid #90CAF9; 
       }
 
-      /* Material 3 風格的搜尋輸入框 */
       #keyword {
-        padding: 0 0 0 12px; /* 調整 padding-left 確保文字不會被遮蓋 */
-        flex-grow: 1; /* 讓輸入框佔據可用空間 */
-        border: none; /* 移除邊界 */
-        border-radius: 0; /* 圓角由 container 控制 */
-        margin: 0; /* 移除 margin */
+        padding: 0 0 0 12px; 
+        flex-grow: 1; 
+        border: none; 
+        border-radius: 0; 
+        margin: 0; 
         font-size: 16px;
-        box-shadow: none; /* 陰影由 container 控制 */
+        box-shadow: none; 
         word-wrap: break-word;
         overflow-wrap: break-word;
         display: block;
-        background-color: transparent; /* 透明背景，顯示 container 背景 */
-        color: #333; /* Default text color */
+        background-color: transparent; 
+        color: #333; 
       }
 
       body.dark-mode #keyword {
-          color: #ffffff; /* Dark mode text color */
+          color: #ffffff; 
       }
 
       body.dark-mode #keyword::placeholder {
-          color: rgba(255, 255, 255, 0.7); /* 較亮的白色，半透明 */
+          color: rgba(255, 255, 255, 0.7); 
       }
 
       #keyword:focus {
-        outline: none; /* 移除預設 focus 框 */
+        outline: none; 
       }
 
-      /* 搜尋 icon 樣式 (Material Icons) */
       #searchIcon {
-        position: static; /* 讓 icon 在 flex 佈局中自然排列 */
-        margin-left: 10px; /* 與 input 之間的間距 */
-        font-size: 24px; /* Material Icons 預設大小 */
+        position: static; 
+        margin-left: 10px; 
+        font-size: 24px; 
         cursor: pointer;
-        color: #555; /* Default icon color */
+        color: #555; 
         transition: color 0.3s ease;
-        flex-shrink: 0; /* 防止 icon 縮小 */
-        /* Material Icons 需要這些樣式 */
-        display: inline-flex; /* 使用 flex 讓 icon 居中 */
+        flex-shrink: 0; 
+        display: inline-flex; 
         align-items: center;
         justify-content: center;
-        width: 24px; /* 設置寬度 */
-        height: 24px; /* 設置高度 */
+        width: 24px; 
+        height: 24px; 
       }
 
       body.dark-mode #searchIcon {
-          color: #ccc; /* Dark mode icon color */
+          color: #ccc; 
       }
 
       #searchIcon:hover {
-        color: #007BFF; /* Hover color */
+        color: #007BFF; 
       }
 
-      /* 定位圖示樣式 */
       #locationIcon {
-          margin-left: 10px; /* 與搜尋圖示的間距，調整為與 searchIcon 相同 */
-          font-size: 20px; /* 調整圖示大小，從 24px 縮小到 20px */
+          margin-left: 10px; 
+          font-size: 20px; 
           cursor: pointer;
-          color: #555; /* 預設圖示顏色 */
+          color: #555; 
           transition: color 0.3s ease;
-          flex-shrink: 0; /* 防止縮小 */
+          flex-shrink: 0; 
       }
       body.dark-mode #locationIcon {
-          color: #ccc; /* 暗色模式圖示顏色 */
+          color: #ccc; 
       }
       #locationIcon.active {
-          color: #007BFF; /* 啟用時的顏色 */
+          color: #007BFF; 
       }
       body.dark-mode #locationIcon.active {
-          color: #90CAF9; /* 暗色模式啟用時的顏色 */
+          color: #90CAF9; 
       }
 
       button {
@@ -157,6 +154,7 @@
         word-wrap: break-word;
         overflow-wrap: break-word;
         position: relative;
+        cursor: pointer; 
       }
       .station:hover {
         transform: translateY(-5px);
@@ -185,7 +183,7 @@
         cursor: pointer;
         color: #007BFF;
         transition: transform 0.2s ease, color 0.2s ease;
-        user-select: none;  /* 防止文字被選取 */
+        user-select: none;  
       }
       .station .pin-button:hover {
         transform: scale(1.2);
@@ -207,8 +205,8 @@
         display: none;
         opacity: 0;
         transition: opacity 0.5s ease;
-        white-space: nowrap;  /* 避免文字換行 */
-        width: auto;         /* 動態調整寬度 */
+        white-space: nowrap;  
+        width: auto;         
       }
       #loading.show {
         opacity: 1;
@@ -258,6 +256,53 @@
       .modal button:hover {
         background-color: #0056b3;
       }
+       /* 地圖彈窗樣式 */
+      #mapModal {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 90%;
+        max-width: 600px;
+        height: 80%;
+        max-height: 500px;
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        z-index: 1001;
+        display: none;
+        flex-direction: column;
+      }
+
+      #mapContainer {
+        width: 100%;
+        height: 100%;
+        border-radius: 10px;
+      }
+       #closeMapBtn {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: rgba(255, 255, 255, 1); 
+        color: #333;
+        border: 1px solid #ccc;
+        font-size: 20px;
+        font-weight: bold;
+        cursor: pointer;
+        z-index: 1002;
+        width: 30px;
+        height: 30px;
+        line-height: 28px;
+        text-align: center;
+        border-radius: 50%; 
+        padding: 0;
+      }
+      body.dark-mode #closeMapBtn {
+        background: #ffffff; 
+        color: #333; 
+        border-color: #ccc;
+      }
+
       body.dark-mode {
         background: #333;
         color: #ffffff;
@@ -269,13 +314,11 @@
         background-color: transparent;
         color: #ffffff;
       }
-      body.dark-mode #keyword:focus {
-      }
        body.dark-mode #searchContainer {
-          background-color: #1e1e1e; /* Dark mode container background */
+          background-color: #1e1e1e; 
       }
        body.dark-mode #searchIcon {
-          color: #ccc; /* Dark mode icon color */
+          color: #ccc; 
       }
       body.dark-mode button {
         background-color: #90caf9;
@@ -318,18 +361,17 @@
         border: 1px solid #444;
       }
       
-      /* Styles for the combined floating menu options */
       #floatingMenuOptions {
           position: fixed;
-          bottom: 120px; /* Position above the main toggle button */
+          bottom: 120px; 
           right: 20px;
           display: flex;
-          flex-direction: column; /* Vertical alignment */
-          gap: 10px; /* Space between buttons */
-          z-index: 1000;
-          opacity: 0; /* Hidden by default */
-          visibility: hidden; /* Hidden by default */
-          transition: opacity 0.3s ease, visibility 0.3s ease; /* Smooth fade in/out */
+          flex-direction: column; 
+          gap: 10px; 
+          z-index: 1000; 
+          opacity: 0; 
+          visibility: hidden; 
+          transition: opacity 0.3s ease, visibility 0.3s ease; 
       }
       #floatingMenuOptions.show {
           opacity: 1;
@@ -356,7 +398,6 @@
           transform: scale(1.1);
       }
 
-      /* Specific styles for dark mode toggle within the combined menu */
       #darkModeToggle {
           background: linear-gradient(135deg, #007BFF, #0056b3);
           color: white;
@@ -373,12 +414,11 @@
         background: linear-gradient(135deg, #64b5f6, #42a5f5);
       }
 
-      /* Main toggle button (gear icon) */
       #mainToggleButton {
         position: fixed;
-        bottom: 60px; /* Position above update countdown */
+        bottom: 60px; 
         right: 20px;
-        z-index: 1200; /* Ensure it's on top */
+        z-index: 998; 
         width: 50px;
         height: 50px;
         background: white;
@@ -399,42 +439,39 @@
 
       #updateCountdown {
           white-space: nowrap;
+          z-index: 997; 
       }
 
-      /* 針對窄螢幕的調整 */
       @media (max-width: 768px) {
         .station {
           width: calc(50% - 20px);
         }
-        /* Adjusted search container for horizontal layout */
         #searchContainer {
-            padding: 8px 16px; /* 調整 padding，左右16px */
+            padding: 8px 16px; 
         }
         #keyword {
-          /* Adjusted width to leave space for the icon and toggle */
-          flex-grow: 1; /* Allow keyword to grow */
+          flex-grow: 1; 
           margin-right: 0;
-          margin-bottom: 0; /* No margin-bottom in row layout */
-          border-radius: 28px; /* Keep rounded corners like default */
+          margin-bottom: 0; 
+          border-radius: 28px; 
           display: block;
-          padding: 0 0 0 12px; /* 調整 padding-left 確保文字不會被遮蓋 */
+          padding: 0 0 0 12px; 
         }
          #searchIcon {
-             position: static; /* Remain in static flow within flex container */
-             margin-left: 10px; /* Space between input and icon */
-             margin-top: 0; /* No margin-top in row layout */
-             align-self: auto; /* Default alignment in flex row */
-             font-size: 24px; /* Material Icons size */
+             position: static; 
+             margin-left: 10px; 
+             margin-top: 0; 
+             align-self: auto; 
+             font-size: 24px; 
              width: 24px;
              height: 24px;
              display: inline-flex;
              align-items: center;
              justify-content: center;
          }
-        /* 定位圖示在窄螢幕下的樣式 */
         #locationIcon {
-            margin-left: 10px; /* 調整間距 */
-            padding-right: 0; /* 移除右側內邊距 */
+            margin-left: 10px; 
+            padding-right: 0; 
         }
 
         button {
@@ -455,15 +492,11 @@
           width: 100%;
         }
         #searchContainer {
-             padding: 10px 16px; /* 更小的螢幕間距，左右保持16px */
+             padding: 10px 16px; 
          }
          #keyword {
-             /* Adjusted width for smaller screens if needed, keeping room for icon and toggle */
-             flex-grow: 1; /* Allow keyword to grow */
-             padding: 0 0 0 12px; /* 調整 padding-left 確保文字不會被遮蓋 */
-         }
-          #searchIcon {
-             /* Icon styles remain consistent with 768px breakpoint */
+             flex-grow: 1; 
+             padding: 0 0 0 12px; 
          }
       }
       #loadingOverlay {
@@ -512,6 +545,12 @@
         <p id="modalText"></p>
         <button id="modalButton">確定</button>
       </div>
+
+      <!-- 地圖彈窗 -->
+      <div id="mapModal">
+        <button id="closeMapBtn">&times;</button>
+        <div id="mapContainer"></div>
+      </div>
       
       <div id="floatingMenuOptions">
           <a href="https://github.com/kevin970712/YouBike" target="_blank" title="YouBike Repo">
@@ -523,9 +562,14 @@
           <button id="darkModeToggle" title="切換暗色模式">🌙</button>
       </div>
 
-      <button id="mainToggleButton" title="設定" style="position: fixed; bottom: 60px; right: 20px; z-index: 1200; width: 50px; height: 50px; background: white; color: black; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); transition: transform 0.2s ease;">⚙️</button>
+      <!-- z-index 已調整，使其位於更底層 -->
+      <button id="mainToggleButton" title="設定" style="position: fixed; bottom: 60px; right: 20px; z-index: 998; width: 50px; height: 50px; background: white; color: black; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); transition: transform 0.2s ease;">⚙️</button>
     </div>
-    <button id="updateCountdown" style="display:none; position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); z-index: 1000; padding: 6px 12px; background-color: white; color: #007bff; border: 2px solid #007bff; border-radius: 25px; font-size: 0.8em; box-shadow: 0 2px 6px rgba(0,0,0,0.2); transition: all 0.3s ease; width: 100px;">60秒後更新</button>
+    <!-- z-index 已調整，使其位於更底層 -->
+    <button id="updateCountdown" style="display:none; position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); z-index: 997; padding: 6px 12px; background-color: white; color: #007bff; border: 2px solid #007bff; border-radius: 25px; font-size: 0.8em; box-shadow: 0 2px 6px rgba(0,0,0,0.2); transition: all 0.3s ease; width: 100px;">60秒後更新</button>
+    
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script>
       let userLocation = null;
       let sortingLocked = false;
@@ -548,6 +592,13 @@
       let useLocation = localStorage.getItem("useLocation") === "true"; 
       
       const locationIcon = document.getElementById('locationIcon');
+      
+      // 地圖相關變數
+      const mapModal = document.getElementById('mapModal');
+      const closeMapBtn = document.getElementById('closeMapBtn');
+      const mapContainer = document.getElementById('mapContainer');
+      let map = null;
+
 
       if (useLocation) {
         locationIcon.classList.add('active');
@@ -571,6 +622,67 @@
           setTimeout(updateResultsOrder, 1500);
         }
       });
+      
+      // 顯示地圖的函式
+      function showMap(lat, lng, name) {
+        mapModal.style.display = 'flex';
+        overlay.classList.add('show');
+
+        if (map) {
+          map.remove();
+        }
+
+        const tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+        const attribution = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+
+        // 將地圖縮放等級設為 19 (OpenStreetMap 的最大等級)
+        map = L.map(mapContainer).setView([lat, lng], 19);
+        
+        L.tileLayer(tileUrl, { 
+            attribution: attribution,
+            maxZoom: 19 
+        }).addTo(map);
+
+        L.marker([lat, lng]).addTo(map)
+            .bindPopup(name)
+            .openPopup();
+        
+        setTimeout(() => {
+            map.invalidateSize();
+        }, 100);
+      }
+
+      // 關閉地圖的函式
+      function closeMap() {
+        mapModal.style.display = 'none';
+        overlay.classList.remove('show');
+      }
+      
+      // 為關閉按鈕和遮罩層添加事件監聽
+      closeMapBtn.addEventListener('click', closeMap);
+      overlay.addEventListener('click', (event) => {
+        if(mapModal.style.display === 'flex') {
+            closeMap();
+        } else if (modal.classList.contains('show')) {
+            hideModal();
+        }
+      });
+      
+      // 使用事件代理來處理站點卡片的點擊事件
+      resultsDiv.addEventListener('click', (event) => {
+        const stationCard = event.target.closest('.station');
+        if (stationCard) {
+            // 確保點擊的不是釘選按鈕
+            if(event.target.classList.contains('pin-button')) {
+                return;
+            }
+            const lat = parseFloat(stationCard.dataset.lat);
+            const lng = parseFloat(stationCard.dataset.lng);
+            const name = stationCard.querySelector('h3').textContent;
+            showMap(lat, lng, name);
+        }
+      });
+
 
       function togglePinStation(stationId, event) {
         event.stopPropagation();
@@ -1089,7 +1201,6 @@
         }
         const keywordInput = document.getElementById('keyword');
         if (keywordInput) {
-          // Changed to update placeholder text based on focus/blur events
           keywordInput.placeholder = "請輸入站點名稱、地址"; 
         }
         const updateCountdownBtn = document.getElementById('updateCountdown');
