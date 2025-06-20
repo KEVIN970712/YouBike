@@ -19,6 +19,12 @@
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", "Microsoft JhengHei", "PingFang TC", sans-serif;
         margin: 20px;
         background: #f4f4f4;
+        /* 移除 iOS 上的點擊高亮效果 */
+        -webkit-tap-highlight-color: transparent;
+      }
+      /* 移除所有可點擊元素的預設焦點框 */
+      a:focus, button:focus, input:focus, select:focus, textarea:focus, [tabindex]:focus {
+          outline: none;
       }
       h1 {
         color: #007BFF;
@@ -283,7 +289,7 @@
         position: absolute;
         top: 8px;
         right: 8px;
-        background: rgba(255, 255, 255, 1); 
+        background: rgba(255, 255, 255, 1); /* 不透明度設定為 100% */
         color: #333;
         border: 1px solid #ccc;
         font-size: 20px;
@@ -294,12 +300,12 @@
         height: 30px;
         line-height: 28px;
         text-align: center;
-        border-radius: 50%; 
+        border-radius: 50%; /* 圓形 */
         padding: 0;
       }
       body.dark-mode #closeMapBtn {
-        background: #ffffff; 
-        color: #333; 
+        background: #ffffff; /* 不透明度設定為 100% */
+        color: #333; /* 為了深色模式下的對比度，調整顏色 */
         border-color: #ccc;
       }
 
@@ -368,7 +374,7 @@
           display: flex;
           flex-direction: column; 
           gap: 10px; 
-          z-index: 1000; 
+          z-index: 1000; /* 保持原有的 z-index */
           opacity: 0; 
           visibility: hidden; 
           transition: opacity 0.3s ease, visibility 0.3s ease; 
@@ -418,7 +424,7 @@
         position: fixed;
         bottom: 60px; 
         right: 20px;
-        z-index: 998; 
+        z-index: 998; /* 將 z-index 調整為更小的值，例如 998 */
         width: 50px;
         height: 50px;
         background: white;
@@ -439,7 +445,7 @@
 
       #updateCountdown {
           white-space: nowrap;
-          z-index: 997; 
+          z-index: 997; /* 將 z-index 調整為更小的值，例如 997 */
       }
 
       @media (max-width: 768px) {
@@ -650,19 +656,34 @@
         setTimeout(() => {
             map.invalidateSize();
         }, 100);
+
+        // 當地圖彈窗開啟時，新增一個歷史紀錄狀態
+        history.pushState({ mapOpen: true }, '', '#map');
       }
 
       // 關閉地圖的函式
       function closeMap() {
         mapModal.style.display = 'none';
         overlay.classList.remove('show');
+        // 不需要在此處呼叫 history.back()，讓 popstate 事件處理返回動作
       }
       
       // 為關閉按鈕和遮罩層添加事件監聽
-      closeMapBtn.addEventListener('click', closeMap);
+      closeMapBtn.addEventListener('click', () => {
+          closeMap();
+          // 如果當前的歷史狀態是地圖彈窗開啟的狀態，則返回上一個歷史狀態
+          if (history.state && history.state.mapOpen) {
+              history.back();
+          }
+      });
+
       overlay.addEventListener('click', (event) => {
         if(mapModal.style.display === 'flex') {
             closeMap();
+            // 如果當前的歷史狀態是地圖彈窗開啟的狀態，則返回上一個歷史狀態
+            if (history.state && history.state.mapOpen) {
+                history.back();
+            }
         } else if (modal.classList.contains('show')) {
             hideModal();
         }
@@ -681,6 +702,14 @@
             const name = stationCard.querySelector('h3').textContent;
             showMap(lat, lng, name);
         }
+      });
+
+      // 監聽 popstate 事件，處理 Android 返回按鈕
+      window.addEventListener('popstate', (event) => {
+          // 如果地圖彈窗是開啟的，就關閉它
+          if (mapModal.style.display === 'flex') {
+              closeMap();
+          }
       });
 
 
