@@ -226,10 +226,17 @@
         height: 100%;
         background-color: rgba(0, 0, 0, 0.5);
         z-index: 999;
-        display: none;
+        /* --- 動畫修改 START --- */
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+        /* --- 動畫修改 END --- */
       }
       .overlay.show {
-        display: block;
+        /* --- 動畫修改 START --- */
+        opacity: 1;
+        visibility: visible;
+        /* --- 動畫修改 END --- */
       }
       .modal {
         position: fixed;
@@ -262,23 +269,33 @@
       .modal button:hover {
         background-color: #0056b3;
       }
-       /* 地圖彈窗樣式 */
+       /* --- 地圖彈窗樣式修改 START --- */
       #mapModal {
         position: fixed;
         top: 50%;
         left: 50%;
-        transform: translate(-50%, -50%);
+        transform: translate(-50%, -50%) scale(0.95); /* 初始狀態稍微縮小 */
         width: 90%;
         max-width: 600px;
         height: 80%;
         max-height: 500px;
         background-color: white;
-        border-radius: 10px; /* 與地圖容器相同的圓角 */
+        border-radius: 10px;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         z-index: 1001;
-        display: none;
+        display: flex; /* 維持 flex 以便內部排版 */
         flex-direction: column;
+        opacity: 0; /* 初始為透明 */
+        visibility: hidden; /* 初始為隱藏 */
+        transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s; /* 加入過渡動畫 */
       }
+
+      #mapModal.show {
+        opacity: 1; /* 顯示時淡入 */
+        visibility: visible; /* 設為可見 */
+        transform: translate(-50%, -50%) scale(1); /* 恢復正常大小 */
+      }
+      /* --- 地圖彈窗樣式修改 END --- */
 
       #mapContainer {
         width: 100%;
@@ -351,6 +368,9 @@
       }
       body.dark-mode .overlay {
         background-color: rgba(0, 0, 0, 0.8);
+      }
+      body.dark-mode #mapModal {
+        background-color: #444;
       }
       body.dark-mode #loading {
         background: #ffffff;
@@ -632,9 +652,10 @@
         }
       });
       
-      // 顯示地圖的函式
+      // --- 顯示地圖的函式修改 START ---
       function showMap(lat, lng, name) {
-        mapModal.style.display = 'flex';
+        // 使用 classList.add 來觸發 CSS 動畫
+        mapModal.classList.add('show');
         overlay.classList.add('show');
 
         if (map) {
@@ -655,6 +676,7 @@
             .bindPopup(name)
             .openPopup();
         
+        // 確保地圖在彈窗動畫結束後正確渲染
         setTimeout(() => {
             map.invalidateSize();
         }, 100);
@@ -662,33 +684,41 @@
         // 當地圖彈窗開啟時，新增一個歷史紀錄狀態
         history.pushState({ mapOpen: true }, '', '#map');
       }
+      // --- 顯示地圖的函式修改 END ---
 
-      // 關閉地圖的函式
+      // --- 關閉地圖的函式修改 START ---
       function closeMap() {
-        mapModal.style.display = 'none';
+        // 使用 classList.remove 來觸發 CSS 動畫
+        mapModal.classList.remove('show');
         overlay.classList.remove('show');
-        // 不需要在此處呼叫 history.back()，讓 popstate 事件處理返回動作
       }
+      // --- 關閉地圖的函式修改 END ---
       
-      // 為關閉按鈕和遮罩層添加事件監聽
+      // 為關閉按鈕添加事件監聽
       closeMapBtn.addEventListener('click', () => {
-          closeMap();
+          // 如果當前的歷史狀態是地圖彈窗開啟的狀態，則返回上一個歷史狀態
           if (history.state && history.state.mapOpen) {
               history.back();
+          } else {
+              closeMap();
           }
       });
 
+      // --- 遮罩層點擊事件修改 START ---
       overlay.addEventListener('click', (event) => {
-        if(mapModal.style.display === 'flex') {
-            closeMap();
-            // 如果當前的歷史狀態是地圖彈窗開啟的狀態，則返回上一個歷史狀態
+        // 檢查 mapModal 是否可見 (透過 class)
+        if(mapModal.classList.contains('show')) {
+            // 如果當前的歷史狀態是地圖彈窗開啟的狀態，則返回上一個歷史狀態，這會觸發 popstate 事件來關閉地圖
             if (history.state && history.state.mapOpen) {
                 history.back();
+            } else {
+                closeMap();
             }
         } else if (modal.classList.contains('show')) {
             hideModal();
         }
       });
+      // --- 遮罩層點擊事件修改 END ---
       
       // 使用事件代理來處理站點卡片的點擊事件
       resultsDiv.addEventListener('click', (event) => {
@@ -705,13 +735,14 @@
         }
       });
 
-      // 監聽 popstate 事件，處理 Android 返回按鈕
+      // --- 監聽 popstate 事件修改 START ---
       window.addEventListener('popstate', (event) => {
-          // 如果地圖彈窗是開啟的，就關閉它
-          if (mapModal.style.display === 'flex') {
+          // 如果地圖彈窗是開啟的 (透過 class 判斷)，就關閉它
+          if (mapModal.classList.contains('show')) {
               closeMap();
           }
       });
+      // --- 監聽 popstate 事件修改 END ---
 
 
       function togglePinStation(stationId, event) {
