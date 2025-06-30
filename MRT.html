@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>高雄捷運到站資訊</title>
+    <!-- 引入 Tailwind CSS CDN 以便快速美化頁面 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 定義 Inter 字體 */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* 自定義滾動條樣式，讓預覽區塊更好看 */
+        .scrollable-content::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+        .scrollable-content::-webkit-scrollbar-thumb {
+            background-color: #cbd5e0; /* 灰藍色 */
+            border-radius: 4px;
+        }
+        .scrollable-content::-webkit-scrollbar-track {
+            background-color: #f1f5f9; /* 淺灰色 */
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-2xl p-8 max-w-4xl w-full text-center border border-blue-200">
+        <h1 class="text-4xl font-bold text-gray-800 mb-6 flex items-center justify-center">
+            <!-- Lucide React Icon: Train -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-train text-blue-500 mr-3">
+                <path d="M6 17.5v-3M18 17.5v-3M2 17h20M2 10h20M14 10V6a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v4M12 10h.01M17 17H7M18 17a3 3 0 1 0 0 6h0a3 3 0 1 0 0-6ZM6 17a3 3 0 1 0 0 6h0a3 3 0 1 0 0-6Z"/>
+            </svg>
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">高雄捷運到站資訊</span>
+        </h1>
+
+        <p class="text-gray-600 mb-8 text-lg">
+            選擇捷運路線和車站以獲取即時到站資訊。
+        </p>
+
+        <div class="flex flex-col md:flex-row items-center justify-center gap-4 mb-8">
+            <div class="w-full md:w-1/2">
+                <label for="lineSelect" class="block text-gray-700 text-sm font-bold mb-2 text-left">選擇路線:</label>
+                <select id="lineSelect" class="block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    <option value="">請選擇路線</option>
+                    <option value="紅線" class="text-red-600">紅線</option>
+                    <option value="橘線" class="text-orange-600">橘線</option>
+                </select>
+            </div>
+            <div class="w-full md:w-1/2">
+                <label for="stationSelect" class="block text-gray-700 text-sm font-bold mb-2 text-left">選擇車站:</label>
+                <select id="stationSelect" class="block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" disabled>
+                    <option value="">請先選擇路線</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="mb-8">
+            <button id="fetchDataBtn" class="px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg shadow-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-300" disabled>
+                <span id="buttonText">查詢到站時間</span>
+                <svg id="loadingSpinner" class="animate-spin h-5 w-5 text-white ml-2 inline-block hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            </button>
+        </div>
+
+        <div id="output" class="bg-gray-50 p-6 rounded-lg text-left border border-gray-200 overflow-x-auto min-h-[200px] flex items-center justify-center">
+            <p id="initialMessage" class="text-gray-500 text-lg">請選擇路線和車站，然後點擊「查詢到站時間」。</p>
+            <!-- 新增載入訊息的元素 -->
+            <div id="loadingMessage" class="hidden flex flex-col items-center justify-center p-4">
+                <svg class="animate-spin h-8 w-8 text-blue-500 mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <p class="text-gray-600 text-lg">資料載入中，請稍候...</p>
+            </div>
+            <!-- 修改為更靈活的 div 結構來顯示資料 -->
+            <div id="dataDisplay" class="hidden w-full scrollable-content">
+                <!-- 資料將在這裡動態生成 -->
+            </div>
+            <p id="errorMessage" class="hidden text-red-600 font-medium text-lg"></p>
+        </div>
+    </div>
+
+    <script>
+        // 後端 Apps Script 的 URL
+        // **重要：請將此 URL 替換為您部署的 Google Apps Script Web 應用程式 URL！**
+        // 建議使用 /exec 結尾的 URL，並確保 Apps Script 部署設定為「存取權：任何人」。
+        const backendUrl = 'https://script.google.com/macros/s/AKfycbxFh9r5iQxAUMesREe1W60h5UJfcU4jScxKVm5_9lcFFmLEz_GmF3fwpH5_VScGqdvU/exec'; 
+
+        // 捷運車站資料 (與您 Python 程式碼中的定義一致)
+        const allStations = {
+            "紅線": ["小港", "高雄國際機場", "草衙", "前鎮高中", "凱旋", "獅甲", "三多商圈", "中央公園", "美麗島", "高雄車站", "後驛", "凹子底", "巨蛋", "生態園區", "左營", "世運", "油廠國小", "楠梓科技園區", "後勁", "都會公園", "青埔", "橋頭糖廠", "橋頭火車站", "岡山高醫", "岡山車站"],
+            "橘線": ["哈瑪星", "鹽埕埔", "前金", "美麗島", "信義國小", "文化中心", "五塊厝", "苓雅運動園區", "衛武營", "鳳山西站", "鳳山", "大東", "鳳山國中", "大寮"]
+        };
+
+        // 取得 DOM 元素
+        const lineSelect = document.getElementById('lineSelect');
+        const stationSelect = document.getElementById('stationSelect');
+        const fetchDataBtn = document.getElementById('fetchDataBtn');
+        const buttonText = document.getElementById('buttonText');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const outputDiv = document.getElementById('output');
+        const initialMessage = document.getElementById('initialMessage');
+        const loadingMessage = document.getElementById('loadingMessage'); // 新增的載入訊息元素
+        const dataDisplay = document.getElementById('dataDisplay');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // 輔助函數：隱藏所有輸出相關元素
+        function hideAllOutputElements() {
+            initialMessage.classList.add('hidden');
+            loadingMessage.classList.add('hidden');
+            dataDisplay.classList.add('hidden');
+            errorMessage.classList.add('hidden');
+        }
+
+        // 監聽路線選擇變化
+        lineSelect.addEventListener('change', () => {
+            const selectedLine = lineSelect.value;
+            stationSelect.innerHTML = '<option value="">請選擇車站</option>'; // 清空車站選單
+            stationSelect.disabled = true; // 預設禁用車站選單
+            fetchDataBtn.disabled = true; // 預設禁用查詢按鈕
+
+            if (selectedLine) {
+                const stations = allStations[selectedLine];
+                if (stations) {
+                    stations.forEach(station => {
+                        const option = document.createElement('option');
+                        option.value = station;
+                        option.textContent = station;
+                        stationSelect.appendChild(option);
+                    });
+                    stationSelect.disabled = false; // 啟用車站選單
+                }
+            }
+            // 重置顯示區塊
+            hideAllOutputElements();
+            initialMessage.classList.remove('hidden'); // 顯示初始訊息
+            // 確保 outputDiv 恢復為居中對齊，以便初始訊息顯示正確
+            outputDiv.classList.add('flex', 'items-center', 'justify-center');
+        });
+
+        // 監聽車站選擇變化，啟用查詢按鈕
+        stationSelect.addEventListener('change', () => {
+            if (lineSelect.value && stationSelect.value) {
+                fetchDataBtn.disabled = false;
+            } else {
+                fetchDataBtn.disabled = true;
+            }
+        });
+
+        // 處理資料載入的函數
+        async function loadTdxData() {
+            const selectedLine = lineSelect.value;
+            const selectedStation = stationSelect.value;
+
+            if (!selectedLine || !selectedStation) {
+                hideAllOutputElements();
+                errorMessage.textContent = '請先選擇路線和車站！';
+                errorMessage.classList.remove('hidden');
+                outputDiv.classList.add('flex', 'items-center', 'justify-center'); // 錯誤訊息也居中
+                return;
+            }
+
+            // 顯示載入狀態
+            hideAllOutputElements();
+            loadingMessage.classList.remove('hidden'); // 顯示載入訊息
+            outputDiv.classList.add('flex', 'items-center', 'justify-center'); // 載入訊息居中
+
+            fetchDataBtn.disabled = true; // 禁用按鈕
+            buttonText.textContent = '載入中...';
+            loadingSpinner.classList.remove('hidden');
+
+            // 構建帶有參數的 URL
+            const urlWithParams = `${backendUrl}?line=${encodeURIComponent(selectedLine)}&station=${encodeURIComponent(selectedStation)}`;
+            console.log('嘗試從此 URL 載入資料:', urlWithParams); // 新增的日誌，用於確認 URL
+
+            try {
+                const response = await fetch(urlWithParams, {
+                    mode: 'cors'
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP 錯誤! 狀態碼: ${response.status}, 回應: ${errorText}`);
+                }
+
+                const data = await response.json(); // 解析 JSON 資料
+                console.log('成功從後端接收到資料:', data); // 新增的日誌，用於確認資料是否成功解析
+
+                // 顯示資料
+                hideAllOutputElements(); // 隱藏所有，包括載入訊息
+                
+                let displayHtml = `<h2 class="text-2xl font-semibold text-gray-800 mb-4">${selectedLine} ${selectedStation} 到站資訊:</h2>`;
+                
+                if (Object.keys(data).length > 0) {
+                    displayHtml += `<div class="grid grid-cols-1 md:grid-cols-2 gap-4">`; // 使用網格佈局
+                    for (const platformName in data) {
+                        const platformData = data[platformName];
+                        // 為每個月台創建一個卡片
+                        displayHtml += `
+                            <div class="bg-white p-4 rounded-lg shadow-md border border-gray-200">
+                                <h3 class="text-lg font-bold text-gray-700 mb-2">${platformName}</h3>
+                                <p class="text-gray-600 mb-2">方向: <span class="font-medium">${platformData.direction}</span></p>
+                                <div class="space-y-1">
+                        `;
+                        platformData.times.forEach(time => {
+                            let timeStr = (time === 0) ? 
+                                `<span class="text-green-600 font-bold">列車進站中</span>` : 
+                                `<span class="text-blue-600 font-bold">${time} 分鐘</span>`;
+                            displayHtml += `<p class="flex items-center text-sm text-gray-800">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clock mr-2 text-gray-500">
+                                                    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                                                </svg>
+                                                ${timeStr}
+                                            </p>`;
+                        });
+                        displayHtml += `
+                                </div>
+                            </div>
+                        `;
+                    }
+                    displayHtml += `</div>`; // 結束網格佈局
+                    
+                    // 添加最後更新時間
+                    const now = new Date();
+                    const lastUpdated = now.toLocaleString('zh-TW', {
+                        year: 'numeric', month: 'numeric', day: 'numeric',
+                        hour: '2-digit', minute: '2-digit', second: '2-digit',
+                        hour12: false
+                    });
+                    displayHtml += `<p class="text-sm text-gray-500 mt-4">最後更新時間: ${lastUpdated}</p>`;
+
+                } else {
+                    displayHtml = `<p class="text-gray-700 text-lg">找不到 ${selectedLine} ${selectedStation} 的到站資訊。</p>`;
+                }
+                dataDisplay.innerHTML = displayHtml; // 將組裝好的 HTML 設置到 dataDisplay
+                dataDisplay.classList.remove('hidden'); // 顯示資料
+                // 移除 outputDiv 的居中對齊，讓資料內容可以正常佔用空間
+                outputDiv.classList.remove('flex', 'items-center', 'justify-center');
+
+            } catch (error) {
+                // 錯誤處理
+                hideAllOutputElements(); // 隱藏所有，包括載入訊息
+                let errorMessageText = `載入資料時發生錯誤: ${error.message}`;
+
+                if (error instanceof TypeError && error.message === 'Failed to fetch') {
+                    errorMessageText += '<br><br>這通常表示：<br>' +
+                                        '1. 您的 Google Apps Script Web 應用程式可能未正確部署。<br>' +
+                                        '2. 請確認 Apps Script 部署時「執行身分」為「我」，「存取權」為「任何人」。<br>' +
+                                        '3. 嘗試直接在瀏覽器中打開此 URL，看看是否能看到 JSON 資料：<br>' +
+                                        `<a href="${urlWithParams}" target="_blank" class="text-blue-500 hover:underline break-all">${urlWithParams}</a><br>` +
+                                        '4. 檢查您的網路連線或是否有瀏覽器擴充功能阻擋了請求。';
+                } else if (error.message.includes('HTTP 錯誤')) {
+                    errorMessageText += '<br><br>這表示 Apps Script 後端可能返回了錯誤，請檢查 Apps Script 的日誌。';
+                }
+
+                errorMessage.innerHTML = errorMessageText; // 使用 innerHTML 顯示帶有 HTML 標籤的錯誤訊息
+                errorMessage.classList.remove('hidden'); // 顯示錯誤訊息
+                outputDiv.classList.add('flex', 'items-center', 'justify-center'); // 錯誤訊息居中
+                console.error('Fetch error:', error);
+            } finally {
+                // 無論成功或失敗，都恢復按鈕狀態
+                fetchDataBtn.disabled = false;
+                buttonText.textContent = '查詢到站時間';
+                loadingSpinner.classList.add('hidden');
+            }
+        }
+
+        // 綁定按鈕點擊事件
+        fetchDataBtn.addEventListener('click', loadTdxData);
+
+        // 頁面載入完成後自動觸發一次路線選單的初始化
+        window.onload = () => {
+            lineSelect.dispatchEvent(new Event('change')); // 觸發一次 change 事件來初始化車站選單
+        };
+    </script>
+</body>
+</html>
